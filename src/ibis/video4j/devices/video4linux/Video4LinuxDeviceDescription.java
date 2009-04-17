@@ -1,6 +1,7 @@
 package ibis.video4j.devices.video4linux;
 
 import ibis.video4j.VideoDeviceDescription;
+import ibis.video4j.VideoPalette;
 
 public class Video4LinuxDeviceDescription extends VideoDeviceDescription {
 
@@ -9,9 +10,10 @@ public class Video4LinuxDeviceDescription extends VideoDeviceDescription {
     
     public Video4LinuxDeviceDescription(String deviceName, 
             String deviceDescription, int deviceNumber, 
+            VideoPalette [] palette, 
             boolean V4L1Available, boolean V4L2Available) {
         
-        super(deviceName, deviceDescription, deviceNumber);
+        super(deviceName, deviceDescription, deviceNumber, palette);
         
         this.V4L1Available = V4L1Available;
         this.V4L2Available = V4L2Available;

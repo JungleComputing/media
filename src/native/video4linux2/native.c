@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <linux/videodev.h>
+#include <linux/videodev2.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
@@ -831,8 +832,8 @@ printf("Opening V4L2 webcam %s\n", str);
 
 	// Set the resolution (palette remains unchanged)
 	format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    	format.fmt.pix.width = 352;
-    	format.fmt.pix.height = 288;
+    	format.fmt.pix.width = 1600;
+    	format.fmt.pix.height = 1200;
     	format.fmt.pix.field = V4L2_FIELD_ANY;
 	format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;   
 
@@ -924,12 +925,13 @@ printf("Opening V4L2 webcam %s\n", str);
 	return 0;
 }
 
-jint v4l2_configureDevice(JNIEnv *env, jobject this, struct vdevice *dev, jint width, jint height, jint palette, jint fps) 
+jint v4l2_configureDevice(JNIEnv *env, jobject this, struct vdevice *dev, jint width, jint height, jint palette, jint fps, jint quality) 
 {
 	int ret, i;
 
 	struct v4l2_format format;
 	struct v4l2_streamparm stream;
+        struct v4l2_jpegcompression compression;
 
 	memset(&format, 0, sizeof(struct v4l2_format));
 	memset(&stream, 0, sizeof(struct v4l2_streamparm));
@@ -946,7 +948,9 @@ jint v4l2_configureDevice(JNIEnv *env, jobject this, struct vdevice *dev, jint w
     	format.fmt.pix.field = V4L2_FIELD_ANY;
    
 	ret = ioctl(dev->filedescriptor, VIDIOC_S_FMT, &format);
-   
+
+		fprintf(stderr, "V4L2 device returned a resolution of %dx%d\n", format.fmt.pix.width, format.fmt.pix.height);
+
 	if (ret < 0) {
 fprintf(stderr, "S_FMT failed\n");
 	   	return -5;
@@ -962,6 +966,20 @@ fprintf(stderr, "S_FMT failed\n");
 	if (ret < 0) {
 fprintf(stderr, "S_PARM failed\n");
 	   	return 0;
+	}
+
+	if (quality >= 0 && quality <= 65535) { 
+		compression.quality = quality;		 
+		compression.APPn = 0;
+		compression.APP_len = 0;
+		compression.COM_len = 0;
+	
+		ret = ioctl(dev->filedescriptor, VIDIOC_S_JPEGCOMP, &compression); 
+
+		if (ret < 0) {
+			fprintf(stderr, "S_COMP failed\n");
+		   	return 0;
+		}
 	}
 
         return 0;
@@ -1082,7 +1100,7 @@ jint Java_ibis_video4j_devices_video4linux_Video4LinuxDevice_initDevice(JNIEnv *
 	return -10;
 }
 
-jint Java_ibis_video4j_devices_video4linux_Video4LinuxDevice_configureDevice(JNIEnv *env, jobject this, jint deviceNumber, jint width, jint height, jint palette, jint fps)
+jint Java_ibis_video4j_devices_video4linux_Video4LinuxDevice_configureDevice(JNIEnv *env, jobject this, jint deviceNumber, jint width, jint height, jint palette, jint fps, jint quality)
 {
 	struct vdevice *dev;	
 
@@ -1096,7 +1114,7 @@ jint Java_ibis_video4j_devices_video4linux_Video4LinuxDevice_configureDevice(JNI
 	if (dev->v4l == 1) { 
 		return v4l_configureDevice(env, this, dev, width, height, palette);
 	} else if (dev->v4l == 2) { 
-		return v4l2_configureDevice(env, this, dev, width, height, palette, fps);
+		return v4l2_configureDevice(env, this, dev, width, height, palette, fps, quality);
 	}
 
 fprintf(stderr, "####### configuring device FAILED %d\n", dev->v4l); 

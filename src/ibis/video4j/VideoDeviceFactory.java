@@ -92,7 +92,23 @@ public abstract class VideoDeviceFactory {
     
     public static VideoSource openDevice(VideoConsumer consumer, 
             int deviceNumber, int width, int height, int delay) 
+        throws Exception {
+        
+        return openDevice(consumer, deviceNumber, width, height, delay, 
+                VideoPalette.ARGB32, 0);        
+    }
+    
+    public static VideoSource openDevice(VideoConsumer consumer, 
+            String description, int width, int height, int delay) 
         throws Exception {        
+    
+        return openDevice(consumer, description, width, height, delay, 
+                VideoPalette.ARGB32, 0);            
+    }
+    
+    public static VideoSource openDevice(VideoConsumer consumer, 
+            int deviceNumber, int width, int height, int delay, 
+            VideoPalette palette, double quality) throws Exception {        
     
         loadLibrary();
         
@@ -104,13 +120,14 @@ public abstract class VideoDeviceFactory {
             throw new Exception("Illegal device number!");
         }
         
-        return factory.createDevice(consumer, deviceNumber, width, height, delay);
+        return factory.createDevice(consumer, deviceNumber, width, height, 
+                delay, palette, quality);
     }
     
     public static VideoSource openDevice(VideoConsumer consumer, 
-            String description, int width, int height, int delay) 
-        throws Exception {        
-    
+            String description, int width, int height, int delay, 
+            VideoPalette palette, double quality) throws Exception {        
+
         loadLibrary();
         
         if (factory == null) { 
@@ -121,13 +138,16 @@ public abstract class VideoDeviceFactory {
             throw new Exception("Illegal device description");
         }
         
-        return factory.createDevice(consumer, description, width, height, delay);
+        return factory.createDevice(consumer, description, width, height, 
+                delay, palette, quality);
     }
     
     protected abstract VideoSource createDevice(VideoConsumer consumer, 
-           int deviceNumber, int width, int height, int delay) throws Exception;
+           int deviceNumber, int width, int height, int delay, 
+           VideoPalette palette, double quality) throws Exception;
         
     protected abstract VideoSource createDevice(VideoConsumer consumer, 
-         String description, int width, int height, int delay) throws Exception;
+         String description, int width, int height, int delay,
+         VideoPalette palette, double quality) throws Exception;
      
 }

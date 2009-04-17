@@ -1,11 +1,12 @@
 package ibis.video4j.devices.video4linux;
 
 import ibis.video4j.VideoPalette;
-import ibis.video4j.devices.video4linux.convertors.RGB24toRGB32;
-import ibis.video4j.devices.video4linux.convertors.RGB32toRGB32;
-import ibis.video4j.devices.video4linux.convertors.YUV420PtoRGB32;
-import ibis.video4j.devices.video4linux.convertors.YUV420toRGB32;
-import ibis.video4j.devices.video4linux.convertors.YUYVtoRGB32;
+import ibis.video4j.devices.video4linux.convertors.MJPEGtoMJPEG;
+import ibis.video4j.devices.video4linux.convertors.RGB24toARGB32;
+import ibis.video4j.devices.video4linux.convertors.ARGB32toARGB32;
+import ibis.video4j.devices.video4linux.convertors.YUV420PtoARGB32;
+import ibis.video4j.devices.video4linux.convertors.YUV420toARGB32;
+import ibis.video4j.devices.video4linux.convertors.YUYVtoARGB32;
 
 import java.util.HashMap;
 
@@ -13,12 +14,12 @@ public class Conversion {
     
     static class ConvertorOptions {
         
-        public final NativePalette from;
+        public final Video4LinuxPalette from;
         
         public final HashMap<VideoPalette, Convertor> convertors = 
             new HashMap<VideoPalette, Convertor>();
     
-        ConvertorOptions(NativePalette from) {
+        ConvertorOptions(Video4LinuxPalette from) {
             this.from = from;
         }
         
@@ -31,18 +32,19 @@ public class Conversion {
         }
     }
         
-    private static final HashMap<NativePalette, ConvertorOptions> convertors = 
-        new HashMap<NativePalette, ConvertorOptions>();
+    private static final HashMap<Video4LinuxPalette, ConvertorOptions> convertors = 
+        new HashMap<Video4LinuxPalette, ConvertorOptions>();
     
     static { 
-        addConvertor(NativePalette.V4L2_PIX_FMT_YUYV, VideoPalette.RGB32, new YUYVtoRGB32());
-        addConvertor(NativePalette.V4L2_PIX_FMT_YUV420, VideoPalette.RGB32, new YUV420toRGB32());
-        addConvertor(NativePalette.VIDEO_PALETTE_YUV420P, VideoPalette.RGB32, new YUV420PtoRGB32());
-        addConvertor(NativePalette.VIDEO_PALETTE_RGB24, VideoPalette.RGB32, new RGB24toRGB32());
-        addConvertor(NativePalette.VIDEO_PALETTE_RGB32, VideoPalette.RGB32, new RGB32toRGB32());
+        addConvertor(Video4LinuxPalette.V4L2_YUYV, VideoPalette.ARGB32, new YUYVtoARGB32());
+        addConvertor(Video4LinuxPalette.V4L2_YUV420, VideoPalette.ARGB32, new YUV420toARGB32());
+        addConvertor(Video4LinuxPalette.V4L1_YUV420P, VideoPalette.ARGB32, new YUV420PtoARGB32());
+        addConvertor(Video4LinuxPalette.V4L1_RGB24, VideoPalette.ARGB32, new RGB24toARGB32());
+        addConvertor(Video4LinuxPalette.V4L1_RGB32, VideoPalette.ARGB32, new ARGB32toARGB32());
+        addConvertor(Video4LinuxPalette.V4L2_MJPEG, VideoPalette.MJPG, new MJPEGtoMJPEG());        
     }
     
-    public static void addConvertor(NativePalette from, VideoPalette to, 
+    public static void addConvertor(Video4LinuxPalette from, VideoPalette to, 
             Convertor convertor) { 
  
        ConvertorOptions options = convertors.get(from);
@@ -55,7 +57,7 @@ public class Conversion {
         options.add(to, convertor);
     }
     
-    public static Convertor getConvertor(NativePalette from, VideoPalette to) { 
+    public static Convertor getConvertor(Video4LinuxPalette from, VideoPalette to) { 
     
         ConvertorOptions options = convertors.get(from);
         
@@ -66,7 +68,7 @@ public class Conversion {
         return options.get(to);
     }
   
-    public static boolean canConvert(NativePalette from, VideoPalette to) { 
+    public static boolean canConvert(Video4LinuxPalette from, VideoPalette to) { 
         
         ConvertorOptions options = convertors.get(from);
         

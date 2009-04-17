@@ -9,6 +9,8 @@ public abstract class VideoSource extends Thread {
     protected final int height;
     protected final int delay;
     
+    protected final double quality;
+    
     private boolean initialized = false;
     private boolean succes = false;
     private boolean done = false;
@@ -17,11 +19,14 @@ public abstract class VideoSource extends Thread {
     private int [] emptyBuffer;
     private int [] fullBuffer;
     
-    protected VideoSource(VideoConsumer consumer, int width, int height, int delay) {
+    protected VideoSource(VideoConsumer consumer, int width, int height, 
+            int delay, double quality) {
+        
         this.consumer = consumer;
         this.width = width;
         this.height = height;
         this.delay = delay;
+        this.quality = quality;
     }
     
     public abstract void setResolution(int width, int height);
@@ -34,6 +39,10 @@ public abstract class VideoSource extends Thread {
         return height;
     }
     
+    public double getQuality() { 
+        return quality;
+    }
+        
   //  public abstract void setPalette(Palette p);
         
     public abstract void close();

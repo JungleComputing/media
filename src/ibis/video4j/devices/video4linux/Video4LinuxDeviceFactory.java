@@ -3,11 +3,13 @@ package ibis.video4j.devices.video4linux;
 import ibis.video4j.VideoConsumer;
 import ibis.video4j.VideoDeviceDescription;
 import ibis.video4j.VideoDeviceFactory;
+import ibis.video4j.VideoPalette;
 
 public class Video4LinuxDeviceFactory extends VideoDeviceFactory {
 
     protected Video4LinuxDevice createDevice(VideoConsumer consumer, 
-            int deviceNumber, int width, int height, int delay) throws Exception { 
+            int deviceNumber, int width, int height, int delay, 
+            VideoPalette palette, double quality) throws Exception { 
         
         Video4LinuxDiscovery discovery = new Video4LinuxDiscovery();
         
@@ -22,19 +24,20 @@ public class Video4LinuxDeviceFactory extends VideoDeviceFactory {
     
         if (d.V4L2Available) { 
             return new Video4LinuxDevice(consumer, d.deviceNumber, width, 
-                    height, delay, 2);
+                    height, delay, 2, palette, quality);
         }
         
         if (d.V4L1Available) { 
             return new Video4LinuxDevice(consumer, d.deviceNumber, width, 
-                    height, delay, 1);
+                    height, delay, 1, palette, quality);
         }
         
         throw new Exception("Failed to initialize device " + deviceNumber);
     }
  
     protected Video4LinuxDevice createDevice(VideoConsumer consumer, 
-            String description, int width, int height, int delay) throws Exception { 
+            String description, int width, int height, int delay, 
+            VideoPalette palette, double quality) throws Exception { 
         
         Video4LinuxDiscovery discovery = new Video4LinuxDiscovery();
         
@@ -60,12 +63,12 @@ public class Video4LinuxDeviceFactory extends VideoDeviceFactory {
         
         if (device.V4L2Available) { 
             return new Video4LinuxDevice(consumer, device.deviceNumber, width, 
-                    height, delay, 2);
+                    height, delay, 2, palette, quality);
         }
         
         if (device.V4L1Available) { 
             return new Video4LinuxDevice(consumer, device.deviceNumber, width, 
-                    height, delay, 1);
+                    height, delay, 1, palette, quality);
         }
         
         throw new Exception("Failed to initialize device " + description);

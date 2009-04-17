@@ -20,9 +20,9 @@ public class DirectShowDevice extends VideoSource {
     private ByteBuffer buffer;
     
     public DirectShowDevice(VideoConsumer consumer, int deviceNumber, int width,
-            int height, int delay) throws Exception {
+            int height, int delay, double quality) throws Exception {
 
-        super(consumer, width, height, delay);
+        super(consumer, width, height, delay, quality);
 
         this.deviceNumber = deviceNumber;
         

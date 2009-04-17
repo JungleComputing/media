@@ -5,6 +5,7 @@ package ibis.video4j.test;
 
 import ibis.video4j.VideoConsumer;
 import ibis.video4j.VideoDeviceFactory;
+import ibis.video4j.VideoPalette;
 import ibis.video4j.devices.VideoSource;
 
 import java.awt.Color;
@@ -30,8 +31,8 @@ class VideoStream extends JPanel implements VideoConsumer {
 
     private VideoSource webcam;
     
-    private int camWidth = 352;
-    private int camHeight = 288;
+    private int camWidth;
+    private int camHeight;
 
     private int [] pixels;
     
@@ -62,10 +63,14 @@ class VideoStream extends JPanel implements VideoConsumer {
     
         // setFont(getFont().deriveFont(Font.ITALIC));
         setBorder(BorderFactory.createEmptyBorder(10,0,0,0));
-        setPreferredSize(new Dimension(352, 288+10));
+        setPreferredSize(new Dimension(width, height+10));
     }
     
-    public void selectDevice(int device) throws Exception {  
+    public void selectDevice(int device, VideoPalette palette) throws Exception {  
+        
+        if (palette == null) { 
+            palette = VideoPalette.ARGB32;
+        }
         
         if (webcam != null) { 
             // Stop the existing device
@@ -74,7 +79,7 @@ class VideoStream extends JPanel implements VideoConsumer {
         
         if (device >= 0) { 
             webcam = VideoDeviceFactory.openDevice(this, device, camWidth, 
-                    camHeight, 0);            
+                    camHeight, 0, palette, 85);            
             webcam.start();
             
             image = 0;

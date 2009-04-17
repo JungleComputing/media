@@ -10,9 +10,6 @@ import ibis.video4j.devices.VideoSource;
 
 public class Video4LinuxDevice extends VideoSource {
     
-    private static final int DEFAULT_WIDTH  = 352;
-    private static final int DEFAULT_HEIGHT = 288;
-  
     private static final int DEFAULT_BUFFERS = 4;
     
     private static final int DISCRETE = 0;
@@ -115,10 +112,10 @@ public class Video4LinuxDevice extends VideoSource {
 
     public class Capability { 
         
-        final NativePalette palette;
+        final Video4LinuxPalette palette;
         final ArrayList<ResolutionCapability> resolutions;
         
-        public Capability(NativePalette palette) {
+        public Capability(Video4LinuxPalette palette) {
             this.palette = palette;
             this.resolutions = new ArrayList<ResolutionCapability>();
         }
@@ -144,16 +141,14 @@ public class Video4LinuxDevice extends VideoSource {
             int api, int buffers);
    
     private native int configureDevice(int deviceNumber, int width, 
-            int height, int palette, int fps);
+            int height, int palette, int fps, int quality);
     
     private native int closeDevice(int deviceNumber);
     
     private native int grab(int deviceNumber);
     
-    
-    
-    private HashMap<NativePalette, Capability> capabilities = 
-        new HashMap<NativePalette, Capability>();
+    private HashMap<Video4LinuxPalette, Capability> capabilities = 
+        new HashMap<Video4LinuxPalette, Capability>();
     
     private final String device; 
     private final int deviceNumber; 
@@ -173,13 +168,14 @@ public class Video4LinuxDevice extends VideoSource {
     
     private ByteBuffer [] buffers;
     
-    private NativePalette currentPalette; 
+    private Video4LinuxPalette currentPalette; 
     private Convertor paletteConvertor;
     
     public Video4LinuxDevice(VideoConsumer consumer, int deviceNumber, 
-            int width, int height, int delay, int api) throws Exception {        
+            int width, int height, int delay, int api, VideoPalette palette, 
+            double quality) throws Exception {        
         
-        super(consumer, width, height, delay);
+        super(consumer, width, height, delay, quality);
     
         this.deviceNumber = deviceNumber;
         this.device = "/dev/video" + deviceNumber;
@@ -198,20 +194,36 @@ public class Video4LinuxDevice extends VideoSource {
         }
     
         // TODO check if these setting are supported!!!!
-        currentHeight = DEFAULT_HEIGHT;
-        currentWidth = DEFAULT_WIDTH;
+        currentWidth = width;
+        currentHeight = height;
         
-        selectPalette();
+        selectPalette(palette);
         
         if (currentPalette == null || paletteConvertor == null) { 
             throw new RuntimeException("Failed to find suitable palette!"); 
         }
-    
-        paletteConvertor = Conversion.getConvertor(currentPalette, 
-                VideoPalette.RGB32);
         
+        int compressionQuality = -1;
+        
+        if (currentPalette.compressed) { 
+        
+            if (quality < 0 || quality > 100) {
+                quality = 85;
+            }
+            
+            compressionQuality = (int) (65535 * (compressionQuality / 100.0));
+            
+            if (compressionQuality < 0) { 
+                compressionQuality = 0;
+            }
+            
+            if (compressionQuality > 65535) { 
+                compressionQuality = 65535;
+            }
+        }
+    
         result = configureDevice(deviceNumber, currentWidth, currentHeight, 
-                currentPalette.getNativeIndex(), 30);      
+                currentPalette.getNativeIndex(), 30, compressionQuality);      
    
         if (result == 0) { 
             System.out.println("Video4Linux device configured");
@@ -242,28 +254,30 @@ public class Video4LinuxDevice extends VideoSource {
         }
     }
     
-    private void selectPalette() { 
+    private void selectPalette(VideoPalette palette) throws Exception { 
     
-        NativePalette palette = null;
+        Video4LinuxPalette result = null;
         Convertor convertor = null; 
         
-        for (NativePalette p : capabilities.keySet()) { 
+        for (Video4LinuxPalette p : capabilities.keySet()) { 
         
-            if (Conversion.canConvert(p, VideoPalette.RGB32)) { 
+            if (Conversion.canConvert(p, palette)) { 
        
-                Convertor tmp = Conversion.getConvertor(p, VideoPalette.RGB32);
+                Convertor tmp = Conversion.getConvertor(p, palette);
                 
-                if (palette == null || (tmp.cost < convertor.cost)) { 
-                    palette = p;
+                if (result == null || (tmp.cost < convertor.cost)) { 
+                    result = p;
                     convertor = tmp;
                 }   
             }
         }
+
+        if (result != null) { 
+            System.out.println("Selected palette: " + result);
         
-        System.out.println("Selected palette: " + palette);
-        
-        currentPalette = palette;
-        paletteConvertor = convertor;
+            currentPalette = result;
+            paletteConvertor = convertor;
+        }
     }
     
     // This method is called from the native layer in response to the 
@@ -276,7 +290,7 @@ public class Video4LinuxDevice extends VideoSource {
         // TODO: Is this correct ?
 
         try { 
-            NativePalette p = NativePalette.getPalette(palette);
+            Video4LinuxPalette p = Video4LinuxPalette.getPalette(palette);
         
             if (p == null) { 
                 System.err.println("Unknown palette!");
@@ -287,7 +301,7 @@ public class Video4LinuxDevice extends VideoSource {
             FrameRate f = null;
             
             if (type == DISCRETE) { 
-                System.out.println("DISCRETE DEVICE CAPABILITY " + p.getCodeName() + " " 
+                System.out.println("DISCRETE DEVICE CAPABILITY " + p.getNativeCode() + " " 
                         + minWidth + " " + minHeight + " " + numerator + "/" + denominator);
                 r = new Resolution(minWidth, minHeight);
             } else if (type == CONTINUOUS) { 
@@ -369,7 +383,7 @@ public class Video4LinuxDevice extends VideoSource {
             paletteConvertor.convert(width, height, tmp, pixels);
         } else { 
             System.out.println("Unsupported palette conversion:" 
-                    + currentPalette.getCodeName() + " to RGB32");
+                    + currentPalette.getName() + " to RGB32");
         }
                 
         consumer.gotImage(pixels, index);       
@@ -426,8 +440,27 @@ public class Video4LinuxDevice extends VideoSource {
         currentHeight = width;
         currentWidth = height;
         
+        int compressionQuality = -1;
+        
+        if (currentPalette.compressed) { 
+        
+            if (quality < 0 || quality > 100) {
+                compressionQuality = (int) (65535 * (compressionQuality / 100.0));
+            } else { 
+                compressionQuality = (int) (65535 * (compressionQuality / 100.0));
+
+                if (compressionQuality < 0) { 
+                    compressionQuality = 0;
+                }
+
+                if (compressionQuality > 65535) { 
+                    compressionQuality = 65535;
+                }
+            }
+        }
+        
         configureDevice(deviceNumber, width, height, 
-                currentPalette.getNativeIndex(), 30);
+                currentPalette.getNativeIndex(), 30, compressionQuality);
     }
     
     public String toString() { 
@@ -441,11 +474,9 @@ public class Video4LinuxDevice extends VideoSource {
         
         s.append(" palette : " );
         
-        NativePalette [] options = NativePalette.values();
-        
         boolean needComma = false;
         
-        for (NativePalette p : options) {
+        for (Video4LinuxPalette p : Video4LinuxPalette.values) {
             if ((availablePalette & (1 << p.getNativeIndex()-1)) != 0) {
                 
                 if (needComma) { 

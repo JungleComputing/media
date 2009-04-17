@@ -3,11 +3,11 @@ package ibis.video4j.devices.video4linux.convertors;
 import java.nio.ByteBuffer;
 import ibis.video4j.devices.video4linux.Convertor;
 
-public final class YUYVtoRGB32 extends Convertor {
+public final class YUYVtoARGB32 extends Convertor {
 
-    private final static int COST = 15;
+    private final static int COST = 4 + (6*4) + 2;
     
-    public YUYVtoRGB32() {
+    public YUYVtoARGB32() {
         super(COST);
     }
 
@@ -25,6 +25,8 @@ public final class YUYVtoRGB32 extends Convertor {
     @Override
     public void convert(int width, int height, Object oin, Object oout) {
         
+       // System.out.println("Converting " + width + " " + height);
+        
         if (!(oin instanceof ByteBuffer)) { 
             throw new RuntimeException("Expecting ByteBuffer as input!");
         }
@@ -35,6 +37,10 @@ public final class YUYVtoRGB32 extends Convertor {
         
         ByteBuffer in = (ByteBuffer) oin;
         int [] out = (int []) oout;
+        
+       // System.out.println("In size " + in.capacity());
+       // System.out.println("Out size 4*" + out.length);
+        
         
         int index = 0;
         

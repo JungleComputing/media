@@ -4,11 +4,11 @@ import java.nio.ByteBuffer;
 
 import ibis.video4j.devices.video4linux.Convertor;
 
-public class YUV420PtoRGB32 extends Convertor {
+public class YUV420PtoARGB32 extends Convertor {
     
-    private final static int COST = 14;
+    private final static int COST = 6 + 12 + 4;
     
-    public YUV420PtoRGB32() {
+    public YUV420PtoARGB32() {
         super(COST);
     }
     

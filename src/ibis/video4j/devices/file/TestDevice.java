@@ -16,7 +16,7 @@ public class TestDevice extends VideoSource {
     private int index = 0;
     
     public TestDevice(VideoConsumer consumer, int width, int height, int delay) {
-        super(consumer, width, height, delay);
+        super(consumer, width, height, delay, 100);
         
         generateTestCard();
         
