@@ -1,11 +1,15 @@
 /**
  * 
  */
-package ibis.video4j.test;
+package ibis.test;
 
+import ibis.imaging4j.Conversion;
+import ibis.imaging4j.Format;
+import ibis.imaging4j.conversion.ConversionException;
+import ibis.imaging4j.conversion.Convertor;
+import ibis.imaging4j.conversion.util.LowLevelConvert;
 import ibis.video4j.VideoConsumer;
 import ibis.video4j.VideoDeviceFactory;
-import ibis.video4j.VideoPalette;
 import ibis.video4j.devices.VideoSource;
 
 import java.awt.Color;
@@ -16,10 +20,17 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
 import java.awt.image.MemoryImageSource;
+import java.awt.image.PackedColorModel;
+import java.nio.ByteBuffer;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -34,6 +45,10 @@ class VideoStream extends JPanel implements VideoConsumer {
     private int camWidth;
     private int camHeight;
 
+    //private ibis.imaging4j.Image pixels;
+    
+    //private Convertor convertor;
+    
     private int [] pixels;
     
     private Image offscreen;
@@ -53,9 +68,25 @@ class VideoStream extends JPanel implements VideoConsumer {
         this.camWidth = width;
         this.camHeight = height;
     
-        pixels = new int[width*height];
+      //  byte [] data = new byte[width*height*4];
         
-        source = new MemoryImageSource(width, height, pixels, 0, width);
+    //    pixels = new ibis.imaging4j.Image(Format.ARGB32, width, height, data);
+        
+         pixels = new int[width*height];
+        
+        source = new MemoryImageSource(width, height, 
+                pixels, 0, width);
+        
+        //source = new MemoryImageSource(width, height, ColorModel.getRGBdefault(), 
+        //        data, 0, width);
+        
+        //ComponentColorModel cm = new ComponentColorModel(
+         //       ColorSpace.getInstance(ColorSpace.CS_LINEAR_RGB), true, true, 
+         //       Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
+        
+        //source = new MemoryImageSource(width, height, cm, data, 0, width);
+        
+        
         source.setAnimated(true);
         source.setFullBufferUpdates(true);
         
@@ -66,20 +97,33 @@ class VideoStream extends JPanel implements VideoConsumer {
         setPreferredSize(new Dimension(width, height+10));
     }
     
-    public void selectDevice(int device, VideoPalette palette) throws Exception {  
-        
-        if (palette == null) { 
-            palette = VideoPalette.ARGB32;
-        }
+    public void selectDevice(int device, Format format) throws Exception {  
         
         if (webcam != null) { 
             // Stop the existing device
             webcam.close();
         }
         
+        if (format == null) { 
+            format = Format.ARGB32;
+        }
+        
+        /*
+        convertor = null;
+        
+        if (format != Format.ARGB32) { 
+            convertor = Conversion.getConvertor(format, Format.ARGB32);
+            
+            if (convertor == null) { 
+                throw new Exception("Failed to find convertor from " + format 
+                        + " to ARGB32");
+            }            
+        }
+        */
+        
         if (device >= 0) { 
             webcam = VideoDeviceFactory.openDevice(this, device, camWidth, 
-                    camHeight, 0, palette, 85);            
+                    camHeight, 0, format, 85);            
             webcam.start();
             
             image = 0;
@@ -89,18 +133,20 @@ class VideoStream extends JPanel implements VideoConsumer {
             webcam = null;
             message = "No webcam selected";
         }
-      
+        
         repaint();
     }
 
+    /*
     public int [] getBuffer(int w, int h, int index) { 
         return pixels;
     }
+    */
     
-    public void gotImage(int [] pixels, int index) {
+    public void gotImage(ibis.imaging4j.Image img) {
         
-        source.newPixels(0, 0, camWidth, camHeight);
-       
+        //source.newPixels(0, 0, camWidth, camHeight);
+        
         if (image == 0) { 
             start = System.currentTimeMillis();
         } else if (image == 100) { 
@@ -109,6 +155,29 @@ class VideoStream extends JPanel implements VideoConsumer {
             start = tmp;
             image = 0;
         }
+        
+        try {
+            
+            if (img.getFormat() == Format.ARGB32) { 
+                img.getData().asIntBuffer().get(pixels);
+            } else { 
+ 
+                // HACK
+                LowLevelConvert.YUYVtoARGB32(img.getWidth(), img.getHeight(), img.getData(), pixels);
+            }
+                /*
+            if (convertor == null) { 
+                // apparently we don't need to convert the image.
+                ibis.imaging4j.Image.copy(img, pixels);
+            } else { 
+                convertor.convert(img, pixels);
+            }
+            */
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        source.newPixels();
         
         image++;    
         repaint();

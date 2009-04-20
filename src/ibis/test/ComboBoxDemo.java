@@ -29,7 +29,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */ 
 
-package ibis.video4j.test;
+package ibis.test;
 
 import java.awt.*;
 import java.awt.event.*;

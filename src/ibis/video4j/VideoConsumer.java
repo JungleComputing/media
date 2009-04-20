@@ -1,8 +1,8 @@
 package ibis.video4j;
 
+import ibis.imaging4j.Image;
+
 
 public interface VideoConsumer {
-    
-    public int [] getBuffer(int w, int h, int index);
-    public void gotImage(int [] buffer, int index);
+    public void gotImage(Image image);
 }

@@ -3,9 +3,9 @@ package ibis.video4j.devices.video4linux;
 import java.io.File;
 import java.util.ArrayList;
 
+import ibis.imaging4j.Format;
 import ibis.video4j.VideoDeviceDescription;
 import ibis.video4j.VideoDeviceDiscovery;
-import ibis.video4j.VideoPalette;
 
 public class Video4LinuxDiscovery implements VideoDeviceDiscovery {
     
@@ -49,7 +49,7 @@ public class Video4LinuxDiscovery implements VideoDeviceDiscovery {
         // FIXME: Palette part is a hack!
         
         current = new Video4LinuxDeviceDescription(name, description, number, 
-                new VideoPalette [] { VideoPalette.ARGB32, VideoPalette.MJPG }, v4l1, v4l2);
+                new Format [] { Format.YUYV, Format.MJPG }, v4l1, v4l2);
     }
     
 }

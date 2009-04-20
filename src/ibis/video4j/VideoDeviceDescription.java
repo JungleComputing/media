@@ -1,12 +1,14 @@
 package ibis.video4j;
 
+import ibis.imaging4j.Format;
+
 public class VideoDeviceDescription {
 
     public final String deviceName;
     public final String deviceDescription;
     public final int deviceNumber;
     
-    private final VideoPalette [] palette;
+    private final Format [] formats;
     
     /**
      * Construct a new VideoDeviceDescription
@@ -17,12 +19,12 @@ public class VideoDeviceDescription {
      */
     public VideoDeviceDescription(final String deviceName, 
             final String deviceDescription, final int deviceNumber, 
-            final VideoPalette [] palette) {
+            final Format [] formats) {
         
         this.deviceName = deviceName;
         this.deviceDescription = deviceDescription;
         this.deviceNumber = deviceNumber;
-        this.palette = palette;
+        this.formats = formats;
     }
     
     public String toString() { 
@@ -33,7 +35,7 @@ public class VideoDeviceDescription {
         return deviceNumber + ": " + deviceName + " (" + deviceDescription + ")";
     }
     
-    public VideoPalette [] getPalettes() { 
-        return palette;
+    public Format [] getFormats() { 
+        return formats;
     }    
 }

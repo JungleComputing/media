@@ -4,8 +4,9 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import ibis.imaging4j.Image;
+import ibis.imaging4j.Format;
 import ibis.video4j.VideoConsumer;
-import ibis.video4j.VideoPalette;
 import ibis.video4j.devices.VideoSource;
 
 public class Video4LinuxDevice extends VideoSource {
@@ -112,10 +113,10 @@ public class Video4LinuxDevice extends VideoSource {
 
     public class Capability { 
         
-        final Video4LinuxPalette palette;
+        final Format palette;
         final ArrayList<ResolutionCapability> resolutions;
         
-        public Capability(Video4LinuxPalette palette) {
+        public Capability(Format palette) {
             this.palette = palette;
             this.resolutions = new ArrayList<ResolutionCapability>();
         }
@@ -147,8 +148,8 @@ public class Video4LinuxDevice extends VideoSource {
     
     private native int grab(int deviceNumber);
     
-    private HashMap<Video4LinuxPalette, Capability> capabilities = 
-        new HashMap<Video4LinuxPalette, Capability>();
+    private HashMap<Format, Capability> capabilities = 
+        new HashMap<Format, Capability>();
     
     private final String device; 
     private final int deviceNumber; 
@@ -167,12 +168,14 @@ public class Video4LinuxDevice extends VideoSource {
     private int availablePalette; 
     
     private ByteBuffer [] buffers;
+    private Image [] images; 
     
-    private Video4LinuxPalette currentPalette; 
-    private Convertor paletteConvertor;
+    private Format currentPalette;
+    private int nativeFormat;
+    //private Convertor paletteConvertor;
     
     public Video4LinuxDevice(VideoConsumer consumer, int deviceNumber, 
-            int width, int height, int delay, int api, VideoPalette palette, 
+            int width, int height, int delay, int api, Format format, 
             double quality) throws Exception {        
         
         super(consumer, width, height, delay, quality);
@@ -182,6 +185,11 @@ public class Video4LinuxDevice extends VideoSource {
         this.buffers = new ByteBuffer[DEFAULT_BUFFERS];
         
         System.out.println("Creating webcam " + width + "x" + height);        
+      
+        // TODO check if these setting are supported!!!!
+        currentWidth = width;
+        currentHeight = height;
+        currentPalette = format;
         
         int result = initDevice(device, deviceNumber, api, DEFAULT_BUFFERS);
         
@@ -192,26 +200,24 @@ public class Video4LinuxDevice extends VideoSource {
             initialized(false);
             resultToException(result);
         }
-    
-        // TODO check if these setting are supported!!!!
-        currentWidth = width;
-        currentHeight = height;
         
-        selectPalette(palette);
+        nativeFormat = -1;
         
-        if (currentPalette == null || paletteConvertor == null) { 
-            throw new RuntimeException("Failed to find suitable palette!"); 
+        if (api == 1) { 
+            nativeFormat = Video4LinuxFormat.getNativeIndexV4L1(format);
+        } else { 
+            nativeFormat = Video4LinuxFormat.getNativeIndexV4L2(format);
+        }
+
+        if (nativeFormat == -1) { 
+            throw new Exception("Format " + format + " not supported!");
         }
         
         int compressionQuality = -1;
         
         if (currentPalette.compressed) { 
-        
-            if (quality < 0 || quality > 100) {
-                quality = 85;
-            }
             
-            compressionQuality = (int) (65535 * (compressionQuality / 100.0));
+            compressionQuality = (int) (65535 * (quality / 100.0));
             
             if (compressionQuality < 0) { 
                 compressionQuality = 0;
@@ -221,9 +227,9 @@ public class Video4LinuxDevice extends VideoSource {
                 compressionQuality = 65535;
             }
         }
-    
+        
         result = configureDevice(deviceNumber, currentWidth, currentHeight, 
-                currentPalette.getNativeIndex(), 30, compressionQuality);      
+                nativeFormat, 30, compressionQuality);      
    
         if (result == 0) { 
             System.out.println("Video4Linux device configured");
@@ -254,32 +260,6 @@ public class Video4LinuxDevice extends VideoSource {
         }
     }
     
-    private void selectPalette(VideoPalette palette) throws Exception { 
-    
-        Video4LinuxPalette result = null;
-        Convertor convertor = null; 
-        
-        for (Video4LinuxPalette p : capabilities.keySet()) { 
-        
-            if (Conversion.canConvert(p, palette)) { 
-       
-                Convertor tmp = Conversion.getConvertor(p, palette);
-                
-                if (result == null || (tmp.cost < convertor.cost)) { 
-                    result = p;
-                    convertor = tmp;
-                }   
-            }
-        }
-
-        if (result != null) { 
-            System.out.println("Selected palette: " + result);
-        
-            currentPalette = result;
-            paletteConvertor = convertor;
-        }
-    }
-    
     // This method is called from the native layer in response to the 
     // initialization of a device
     @SuppressWarnings("unused")
@@ -290,7 +270,7 @@ public class Video4LinuxDevice extends VideoSource {
         // TODO: Is this correct ?
 
         try { 
-            Video4LinuxPalette p = Video4LinuxPalette.getPalette(palette);
+            Format p = Video4LinuxFormat.getFormat(palette);
         
             if (p == null) { 
                 System.err.println("Unknown palette!");
@@ -301,7 +281,7 @@ public class Video4LinuxDevice extends VideoSource {
             FrameRate f = null;
             
             if (type == DISCRETE) { 
-                System.out.println("DISCRETE DEVICE CAPABILITY " + p.getNativeCode() + " " 
+                System.out.println("DISCRETE DEVICE CAPABILITY " + p + " " 
                         + minWidth + " " + minHeight + " " + numerator + "/" + denominator);
                 r = new Resolution(minWidth, minHeight);
             } else if (type == CONTINUOUS) { 
@@ -356,12 +336,14 @@ public class Video4LinuxDevice extends VideoSource {
     @SuppressWarnings("unused")
     private void bufferCount(int buffers) {
         System.out.println("BUFFERS " + buffers);
-        this.buffers = new ByteBuffer[buffers]; 
+        this.buffers = new ByteBuffer[buffers];
+        this.images = new Image[buffers];
     }
    
     @SuppressWarnings("unused")
-    private void addBuffer(int index, ByteBuffer buffer) { 
+    private void addBuffer(int index, ByteBuffer buffer) {         
         buffers[index] = buffer;        
+        images[index] = new Image(currentPalette, currentWidth, currentHeight, buffer);
         System.out.println("GOT BUFFER " + index + " of size " + buffer.capacity());
     } 
     
@@ -373,6 +355,14 @@ public class Video4LinuxDevice extends VideoSource {
     private boolean gotImage(int index, int size) { 
         // An image has appeared in buffer[index]
         
+        ByteBuffer tmp = buffers[index];
+        
+        tmp.position(0);
+        tmp.limit(size);
+                
+        consumer.gotImage(images[index]);       
+        
+        /*
         int [] pixels = consumer.getBuffer(currentWidth, currentHeight, index);
         
         // Is this correct ?
@@ -387,6 +377,7 @@ public class Video4LinuxDevice extends VideoSource {
         }
                 
         consumer.gotImage(pixels, index);       
+        */
     
         // NOTE: return if we want another frame... 
         return !getDone();
@@ -460,7 +451,7 @@ public class Video4LinuxDevice extends VideoSource {
         }
         
         configureDevice(deviceNumber, width, height, 
-                currentPalette.getNativeIndex(), 30, compressionQuality);
+                nativeFormat, 30, compressionQuality);
     }
     
     public String toString() { 
@@ -472,11 +463,12 @@ public class Video4LinuxDevice extends VideoSource {
         s.append(" height  : " + minHeight + " ... " + maxHeight + "\n"); 
         s.append(" buffers : " + buffers.length + "\n"); 
         
-        s.append(" palette : " );
+        s.append(" palette : <FIXME>" );
         
+        /*
         boolean needComma = false;
         
-        for (Video4LinuxPalette p : Video4LinuxPalette.values) {
+        for (Video4LinuxFormat p : Video4LVideo4LinuxFormat) {
             if ((availablePalette & (1 << p.getNativeIndex()-1)) != 0) {
                 
                 if (needComma) { 
@@ -488,7 +480,7 @@ public class Video4LinuxDevice extends VideoSource {
                 s.append(p.getDescription());
             }
         }
-
+*/
         s.append("\n");
 
         if (currentPalette != null) { 

@@ -1,5 +1,6 @@
 package ibis.video4j;
 
+import ibis.imaging4j.Format;
 import ibis.video4j.devices.VideoSource;
 import ibis.video4j.devices.directshow.DirectShowDeviceFactory;
 import ibis.video4j.devices.directshow.DirectShowDiscovery;
@@ -95,7 +96,7 @@ public abstract class VideoDeviceFactory {
         throws Exception {
         
         return openDevice(consumer, deviceNumber, width, height, delay, 
-                VideoPalette.ARGB32, 0);        
+                Format.ARGB32, 0);        
     }
     
     public static VideoSource openDevice(VideoConsumer consumer, 
@@ -103,12 +104,12 @@ public abstract class VideoDeviceFactory {
         throws Exception {        
     
         return openDevice(consumer, description, width, height, delay, 
-                VideoPalette.ARGB32, 0);            
+                Format.ARGB32, 0);            
     }
     
     public static VideoSource openDevice(VideoConsumer consumer, 
             int deviceNumber, int width, int height, int delay, 
-            VideoPalette palette, double quality) throws Exception {        
+            Format palette, double quality) throws Exception {        
     
         loadLibrary();
         
@@ -126,7 +127,7 @@ public abstract class VideoDeviceFactory {
     
     public static VideoSource openDevice(VideoConsumer consumer, 
             String description, int width, int height, int delay, 
-            VideoPalette palette, double quality) throws Exception {        
+            Format palette, double quality) throws Exception {        
 
         loadLibrary();
         
@@ -144,10 +145,10 @@ public abstract class VideoDeviceFactory {
     
     protected abstract VideoSource createDevice(VideoConsumer consumer, 
            int deviceNumber, int width, int height, int delay, 
-           VideoPalette palette, double quality) throws Exception;
+           Format palette, double quality) throws Exception;
         
     protected abstract VideoSource createDevice(VideoConsumer consumer, 
          String description, int width, int height, int delay,
-         VideoPalette palette, double quality) throws Exception;
+         Format palette, double quality) throws Exception;
      
 }

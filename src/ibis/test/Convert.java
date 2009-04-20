@@ -1,9 +1,6 @@
-package ibis.video4j.test;
+package ibis.test;
 
-import java.io.IOException;
-
-import com.sun.image.codec.jpeg.ImageFormatException;
-
+import ibis.imaging4j.Image;
 import ibis.video4j.VideoConsumer;
 import ibis.video4j.VideoDeviceFactory;
 import ibis.video4j.devices.VideoSource;
@@ -27,28 +24,20 @@ public class Convert implements VideoConsumer {
         webcam.start();
     }
 
-    public int[] getBuffer(int w, int h, int index) {
-    
-        if (buffer == null) { 
-            buffer = new int[w*h];
-        }
-
-        return buffer;
-    }
-
-    public void gotImage(int[] buffer, int index) {
+    public void gotImage(Image image) {
 
         try {
             
             long start = System.currentTimeMillis();
             
-            byte [] out = ImageUtils.encode(buffer, w, h, 85);
+            // FIX FIX FIX!
+          //  byte [] out = ImageUtils.encode(buffer, w, h, 85);
             
             long end = System.currentTimeMillis();
             
-            System.out.println("Image enode took " + (end-start) + " ms. " 
-                    + "Compressed from " + (buffer.length*4) + " to " 
-                    + out.length + " bytes.");
+            //System.out.println("Image enode took " + (end-start) + " ms. " 
+            //        + "Compressed from " + (buffer.length*4) + " to " 
+             //       + out.length + " bytes.");
 
         } catch (Exception e) {
             System.out.println("Failed to encode image!");

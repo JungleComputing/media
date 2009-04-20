@@ -84,7 +84,10 @@ public class DirectShowDevice extends VideoSource {
             }
             
             if (result == 1) { 
+
+                System.out.println("FIX WINDOWS VERSION!!!");
                 
+                /*
                 System.out.println("Got image!!");
                 
                 int [] tmp = consumer.getBuffer(width, height, 0);
@@ -102,6 +105,9 @@ public class DirectShowDevice extends VideoSource {
                 }
                 
                 consumer.gotImage(tmp, 0);
+                
+                */
+                
             } else { 
                 System.out.println("Failed to grab image!");
                 return;

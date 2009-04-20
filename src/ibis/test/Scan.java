@@ -1,4 +1,4 @@
-package ibis.video4j.test;
+package ibis.test;
 
 import ibis.video4j.VideoDeviceDescription;
 import ibis.video4j.VideoDeviceFactory;

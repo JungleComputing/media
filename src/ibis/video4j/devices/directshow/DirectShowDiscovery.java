@@ -2,9 +2,9 @@ package ibis.video4j.devices.directshow;
 
 import java.util.ArrayList;
 
+import ibis.imaging4j.Format;
 import ibis.video4j.VideoDeviceDescription;
 import ibis.video4j.VideoDeviceDiscovery;
-import ibis.video4j.VideoPalette;
 
 public class DirectShowDiscovery implements VideoDeviceDiscovery {
     
@@ -25,7 +25,7 @@ public class DirectShowDiscovery implements VideoDeviceDiscovery {
             if (description != null) { 
                 devices.add(new VideoDeviceDescription("device" + i, 
                         description, i, 
-                        new VideoPalette [] { VideoPalette.RGB24 }));
+                        new Format [] { Format.RGB24 }));
             }
         
         }

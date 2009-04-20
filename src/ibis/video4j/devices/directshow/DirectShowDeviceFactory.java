@@ -1,16 +1,16 @@
 package ibis.video4j.devices.directshow;
 
+import ibis.imaging4j.Format;
 import ibis.video4j.VideoConsumer;
 import ibis.video4j.VideoDeviceDescription;
 import ibis.video4j.VideoDeviceFactory;
-import ibis.video4j.VideoPalette;
 import ibis.video4j.devices.VideoSource;
 
 public class DirectShowDeviceFactory extends VideoDeviceFactory {
 
     @Override
     protected VideoSource createDevice(VideoConsumer consumer, int deviceNumber,
-            int width, int height, int delay, VideoPalette palette, 
+            int width, int height, int delay, Format palette, 
             double quality) throws Exception {
         
         DirectShowDiscovery discovery = new DirectShowDiscovery();
@@ -30,7 +30,7 @@ public class DirectShowDeviceFactory extends VideoDeviceFactory {
     @Override
     protected VideoSource createDevice(VideoConsumer consumer, 
             String description, int width, int height, int delay, 
-            VideoPalette palette, double quality) throws Exception {
+            Format palette, double quality) throws Exception {
 
         DirectShowDiscovery discovery = new DirectShowDiscovery();
         

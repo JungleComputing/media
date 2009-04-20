@@ -1,4 +1,6 @@
-package ibis.video4j.test;
+package ibis.test;
+
+import ibis.imaging4j.Format;
 import ibis.video4j.VideoConsumer;
 import ibis.video4j.VideoDeviceFactory;
 import ibis.video4j.devices.VideoSource;
@@ -10,6 +12,7 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.ColorModel;
 import java.awt.image.MemoryImageSource;
 
 import javax.swing.JApplet;
@@ -48,7 +51,9 @@ public class SimpleViewer extends JApplet {
         private int camWidth = 352;
         private int camHeight = 288;
 
-        private int [] pixels;
+       // private int [] pixels;
+        
+        private ibis.imaging4j.Image pixels; 
         
         private Image offscreen;
         private MemoryImageSource source;
@@ -67,9 +72,26 @@ public class SimpleViewer extends JApplet {
             this.camWidth = width;
             this.camHeight = height;
         
+            
+            byte [] data = new byte[width*height*4];
+            
+            pixels = new ibis.imaging4j.Image(Format.ARGB32, width, height, data);
+            
+            // pixels = new int[width*height];
+            
+            //source = new MemoryImageSource(width, height, 
+            //        pixels, 0, width);
+            
+            source = new MemoryImageSource(width, height, ColorModel.getRGBdefault(), 
+                    data, 0, width);
+            
+            /*
             pixels = new int[width*height];
             
             source = new MemoryImageSource(width, height, pixels, 0, width);
+            */
+            
+            
             source.setAnimated(true);
             source.setFullBufferUpdates(true);
             
@@ -81,11 +103,8 @@ public class SimpleViewer extends JApplet {
             System.out.println(webcam.toString());
         }
        
-        public int [] getBuffer(int w, int h, int index) { 
-            return pixels;
-        }
         
-        public void gotImage(int [] pixels, int index) {
+        public void gotImage(ibis.imaging4j.Image img) {
             
             source.newPixels(0, 0, camWidth, camHeight);
            

@@ -1,13 +1,139 @@
 package ibis.video4j.devices.video4linux;
 
-import ibis.video4j.VideoPalette;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.Map.Entry;
 
-public class Video4LinuxPalette extends VideoPalette { 
+import ibis.imaging4j.Format;
 
+public class Video4LinuxFormat { 
+
+    private static HashMap<Format, Integer> mappingV4L1;
+    private static HashMap<Format, Integer> mappingV4L2;
+    
+    static { 
+        mappingV4L1 = new HashMap<Format, Integer>(); 
+    
+        mappingV4L1.put(Format.GREY, 1);
+        // mappingV4L1.put(Format.HI240, 2);
+        // mappingV4L1.put(Format.RGB565, 3);
+        mappingV4L1.put(Format.RGB24, 4);
+        mappingV4L1.put(Format.ARGB32, 5);
+        mappingV4L1.put(Format.RGB555, 6);
+        mappingV4L1.put(Format.YUV422, 7);
+        mappingV4L1.put(Format.YUYV, 8);
+        //mappingV4L1.put(Format.UYUV, 9);
+        mappingV4L1.put(Format.YUV420, 10);
+        mappingV4L1.put(Format.YUV411, 11);
+        mappingV4L1.put(Format.RAW, 12);        
+        mappingV4L1.put(Format.YUV422P, 13);
+        mappingV4L1.put(Format.YUV411P, 14);
+        mappingV4L1.put(Format.YUV420P, 15);
+        mappingV4L1.put(Format.YUV410P, 16);
+        
+        
+        mappingV4L2 = new HashMap<Format, Integer>(); 
+        
+        //mappingV4L2.put(Format.RGB332, V4L2PaletteStringToNumber("RGB1"));
+        mappingV4L2.put(Format.RGB555, V4L2PaletteStringToNumber("RGB0"));
+        mappingV4L2.put(Format.RGB565, V4L2PaletteStringToNumber("RGBP"));
+        //mappingV4L2.put(Format.RGB555X, V4L2PaletteStringToNumber("RGBQ"));
+        //mappingV4L2.put(Format.RGB565X, V4L2PaletteStringToNumber("RGBR"));
+        //mappingV4L2.put(Format.BGR24, V4L2PaletteStringToNumber("BGR3"));
+        mappingV4L2.put(Format.RGB24, V4L2PaletteStringToNumber("RGB3"));
+        //mappingV4L2.put(Format.BGR32, V4L2PaletteStringToNumber("BGR4"));
+        //mappingV4L2.put(Format.RGB32, V4L2PaletteStringToNumber("RGB4"));
+        mappingV4L2.put(Format.GREY, V4L2PaletteStringToNumber("GREY"));
+        //mappingV4L2.put(Format.YVU410, V4L2PaletteStringToNumber("YVU9"));
+        //mappingV4L2.put(Format.YVU420, V4L2PaletteStringToNumber("YV12"));
+        mappingV4L2.put(Format.YUYV, V4L2PaletteStringToNumber("YUYV"));
+        mappingV4L2.put(Format.UYVY, V4L2PaletteStringToNumber("UYVY"));
+        mappingV4L2.put(Format.YUV422P, V4L2PaletteStringToNumber("422P"));
+        mappingV4L2.put(Format.YUV411P, V4L2PaletteStringToNumber("411P"));
+        //mappingV4L2.put(Format.Y41P, V4L2PaletteStringToNumber("Y41P"));
+        //mappingV4L2.put(Format.NV12, V4L2PaletteStringToNumber("NV12"));
+        //mappingV4L2.put(Format.NV21, V4L2PaletteStringToNumber("NV21"));
+        
+        //mappingV4L2.put(Format.YUV410, V4L2PaletteStringToNumber("YUV9"));
+        mappingV4L2.put(Format.YUV420, V4L2PaletteStringToNumber("YU12"));
+        //mappingV4L2.put(Format.YYUV, V4L2PaletteStringToNumber("YYUV"));
+        //mappingV4L2.put(Format.HI240, V4L2PaletteStringToNumber("HI24"));
+        //mappingV4L2.put(Format.HM12, V4L2PaletteStringToNumber("HM12"));
+        //mappingV4L2.put(Format.RGB444, V4L2PaletteStringToNumber("R444"));
+        //mappingV4L2.put(Format.SBGGR8, V4L2PaletteStringToNumber("BA81"));
+        mappingV4L2.put(Format.MJPG, V4L2PaletteStringToNumber("MJPG"));
+        mappingV4L2.put(Format.JPG, V4L2PaletteStringToNumber("JPEG"));
+        //mappingV4L2.put(Format.DV, V4L2PaletteStringToNumber("dvsd"));
+        mappingV4L2.put(Format.MPEG, V4L2PaletteStringToNumber("MPEG"));
+        //mappingV4L2.put(Format.WNVA, V4L2PaletteStringToNumber("WNVA"));
+        //mappingV4L2.put(Format.SN9C10X, V4L2PaletteStringToNumber("S910"));
+        //mappingV4L2.put(Format.PWC1, V4L2PaletteStringToNumber("PWC1"));
+        //mappingV4L2.put(Format.PWC2, V4L2PaletteStringToNumber("PWC2"));
+        //mappingV4L2.put(Format.ET61X251, V4L2PaletteStringToNumber("E625"));
+    }  
+
+    private static int V4L2PaletteStringToNumber(String name) { 
+
+        if (name == null || name.length() != 4) { 
+            return -1;
+        }
+
+        char c1 = name.charAt(0);
+        char c2 = name.charAt(1);
+        char c3 = name.charAt(2);
+        char c4 = name.charAt(3);
+
+        return (c1 & 0xFF) | ((c2 & 0xFF) << 8) | ((c3 & 0xFF) << 16) | ((c4 & 0xFF) << 24); 
+    }
+
+    public static int getNativeIndexV4L1(Format format) { 
+        
+        Integer result = mappingV4L1.get(format);
+        
+        if (result == null) { 
+            return -1;
+        }
+        
+        return result.intValue();        
+    }
+
+    public static int getNativeIndexV4L2(Format format) { 
+        
+        Integer result = mappingV4L2.get(format);
+        
+        if (result == null) { 
+            return -1;
+        }
+        
+        return result.intValue();        
+    }
+    
+    public static Format getFormat(int nativeIndex) { 
+
+        Set<Entry<Format, Integer>> tmp = mappingV4L2.entrySet();
+        
+        for (Entry<Format, Integer> e : tmp) { 
+            if (e.getValue().intValue() == nativeIndex) { 
+                return e.getKey();
+            }
+        }
+    
+        tmp = mappingV4L1.entrySet();
+            
+        for (Entry<Format, Integer> e : tmp) { 
+            if (e.getValue().intValue() == nativeIndex) { 
+                return e.getKey();
+            }
+        }
+        
+        return null;
+    }
+    
+/*    
     // Old video4linux palette
     public static final Video4LinuxPalette V4L1_GREY = new Video4LinuxPalette("V4L1_GREY", 8, "Linear greyscale", 1);         
     public static final Video4LinuxPalette V4L1_HI240 = new Video4LinuxPalette("V4L1_HI240", 8, "High 240 cube", 2);
-    public static final Video4LinuxPalette V4L1_RGB565 = new Video4LinuxPalette("V4L1_RGB565", 16, "16 bit RGB", 2); 
+    public static final Video4LinuxPalette V4L1_RGB565 = new Video4LinuxPalette("V4L1_RGB565", 16, "16 bit RGB", 3); 
     public static final Video4LinuxPalette V4L1_RGB24 = new Video4LinuxPalette("V4L1_RGB24", 24, "24 bit RGB", 4); 
     public static final Video4LinuxPalette V4L1_RGB32 = new Video4LinuxPalette("V4L1_RGB32", 32, "32 bit RGB", 5);  
     public static final Video4LinuxPalette V4L1_RGB555 = new Video4LinuxPalette("V4L1_RGB555", 15, "15 bit RGB", 6); 
@@ -41,11 +167,11 @@ public class Video4LinuxPalette extends VideoPalette {
     public static final Video4LinuxPalette V4L2_YUV411P = new Video4LinuxPalette("411P", 16, "YVU411 planar");
     public static final Video4LinuxPalette V4L2_Y41P = new Video4LinuxPalette("Y41P", 12, "YUV 4:1:1");
 
-    /* two planes -- one Y, one Cr + Cb interleaved */
+    // two planes -- one Y, one Cr + Cb interleaved 
     public static final Video4LinuxPalette V4L2_NV12 = new Video4LinuxPalette("NV12", 12, "Y/CbCr 4:2:0");
     public static final Video4LinuxPalette V4L2_NV21 = new Video4LinuxPalette("NV21", 12, "Y/CrCb 4:2:0");
 
-    /* The following formats are not defined in the V4L2 specification */
+    // The following formats are not defined in the V4L2 specification 
     public static final Video4LinuxPalette V4L2_YUV410 = new Video4LinuxPalette("YUV9", 9, "YUV 4:1:0"); 
     public static final Video4LinuxPalette V4L2_YUV420 = new Video4LinuxPalette("YU12", 12, "YUV 4:2:0"); 
     public static final Video4LinuxPalette V4L2_YYUV = new Video4LinuxPalette("YYUV", 16, "YUV 4:2:2"); 
@@ -53,22 +179,23 @@ public class Video4LinuxPalette extends VideoPalette {
     public static final Video4LinuxPalette V4L2_HM12 = new Video4LinuxPalette("HM12", 8, "YUV 4:2:0 16x16 macroblocks"); 
     public static final Video4LinuxPalette V4L2_RGB444 = new Video4LinuxPalette("R444", 16, "xxxxrrrr ggggbbbb");
 
-    /* see http://www.siliconimaging.com/RGB%20Bayer.htm */
+    // see http://www.siliconimaging.com/RGB%20Bayer.htm 
     public static final Video4LinuxPalette V4L2_SBGGR8 = new Video4LinuxPalette("BA81", 8, "BGBG.. GRGR.."); 
 
-    /* compressed formats */
+    // compressed formats 
     public static final Video4LinuxPalette V4L2_MJPEG = new Video4LinuxPalette("MJPG", 0, "Motion-JPEG", true); 
     public static final Video4LinuxPalette V4L2_JPEG = new Video4LinuxPalette("JPEG", 0, "JFIF JPEG", true); 
     public static final Video4LinuxPalette V4L2_DV = new Video4LinuxPalette("dvsd", 0, "1394", true); 
     public static final Video4LinuxPalette V4L2_MPEG = new Video4LinuxPalette("MPEG", 0, "MPEG-1/2/4", true);
 
-    /* Vendor-specific formats */
+    // Vendor-specific formats 
     public static final Video4LinuxPalette V4L2_WNVA = new Video4LinuxPalette("WNVA", 0, "Winnov hw compress", true); 
     public static final Video4LinuxPalette V4L2_SN9C10X = new Video4LinuxPalette("S910", 0, "SN9C10x compression", true); 
     public static final Video4LinuxPalette V4L2_PWC1 = new Video4LinuxPalette("PWC1", 0, "pwc older webcam", true); 
     public static final Video4LinuxPalette V4L2_PWC2 = new Video4LinuxPalette("PWC2", 0, "pwc newer webcam", true); 
     public static final Video4LinuxPalette V4L2_ET61X251 = new Video4LinuxPalette("E625", 0, "ET61X251 compression", true);
 
+    
     public static final int V4L1_START_PALETTE = 1;
     public static final int V4L1_END_PALETTE = 16;
 
@@ -170,21 +297,10 @@ public class Video4LinuxPalette extends VideoPalette {
 
         return tmp.toString(); 
     }
-
-    protected int V4L2PaletteStringToNumber(String name) { 
-
-        if (name == null || name.length() != 4) { 
-            return -1;
-        }
-
-        char c1 = name.charAt(0);
-        char c2 = name.charAt(1);
-        char c3 = name.charAt(2);
-        char c4 = name.charAt(3);
-
-        return (c1 & 0xFF) | ((c2 & 0xFF) << 8) | ((c3 & 0xFF) << 16) | ((c4 & 0xFF) << 24); 
-    }
-
+*/
+    
+    /*
+    
     public int getNativeIndex() { 
         return number;
     }

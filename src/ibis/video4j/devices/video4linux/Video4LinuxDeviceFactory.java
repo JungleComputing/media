@@ -1,15 +1,15 @@
 package ibis.video4j.devices.video4linux;
 
+import ibis.imaging4j.Format;
 import ibis.video4j.VideoConsumer;
 import ibis.video4j.VideoDeviceDescription;
 import ibis.video4j.VideoDeviceFactory;
-import ibis.video4j.VideoPalette;
 
 public class Video4LinuxDeviceFactory extends VideoDeviceFactory {
 
     protected Video4LinuxDevice createDevice(VideoConsumer consumer, 
             int deviceNumber, int width, int height, int delay, 
-            VideoPalette palette, double quality) throws Exception { 
+            Format palette, double quality) throws Exception { 
         
         Video4LinuxDiscovery discovery = new Video4LinuxDiscovery();
         
@@ -37,7 +37,7 @@ public class Video4LinuxDeviceFactory extends VideoDeviceFactory {
  
     protected Video4LinuxDevice createDevice(VideoConsumer consumer, 
             String description, int width, int height, int delay, 
-            VideoPalette palette, double quality) throws Exception { 
+            Format palette, double quality) throws Exception { 
         
         Video4LinuxDiscovery discovery = new Video4LinuxDiscovery();
         

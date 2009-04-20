@@ -1,8 +1,8 @@
-package ibis.video4j.test;
+package ibis.test;
 
+import ibis.imaging4j.Format;
 import ibis.video4j.VideoDeviceDescription;
 import ibis.video4j.VideoDeviceFactory;
-import ibis.video4j.VideoPalette;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -10,7 +10,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -118,7 +117,7 @@ public class ViewerDemo extends JPanel implements ActionListener {
                     ex.printStackTrace();
                 }
 */
-                VideoPalette [] palette = d.getPalettes();
+                Format [] palette = d.getFormats();
                 
                 formatList.removeAllItems();
                 
@@ -165,9 +164,9 @@ public class ViewerDemo extends JPanel implements ActionListener {
                 VideoDeviceDescription d = (VideoDeviceDescription) device;
                 System.out.println("Selected device: " + d.getSimpleDescription());
 
-                if (format instanceof VideoPalette) { 
+                if (format instanceof Format) { 
                     try { 
-                        videoStream.selectDevice(d.deviceNumber, (VideoPalette) format);
+                        videoStream.selectDevice(d.deviceNumber, (Format) format);
                         return;
                     } catch (Exception ex) {
                         videoStream.setMessage("Failed to select device " + d.deviceNumber);
