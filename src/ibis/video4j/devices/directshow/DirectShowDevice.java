@@ -90,7 +90,7 @@ public class DirectShowDevice extends VideoSource {
                 /*
                 System.out.println("Got image!!");
                 
-                int [] tmp = consumer.getBuffer(width, height, 0);
+                int [] tmp = consumer.getBuffer(width, height, 0, width*height);
 
                 buffer.rewind();
                 

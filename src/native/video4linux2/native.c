@@ -27,6 +27,8 @@ struct vdevice {
 	int height;
 	int palette;
 
+	int configured;	
+
 	int available_buffers;
 	int next_buffer;
 
@@ -736,24 +738,18 @@ int enum_frame_formats(int dev)
 #endif // DEBUG
 
 
-jint v4l2_initDevice(JNIEnv *env, jobject this, jstring device, jint deviceNumber, jint bufferCount)
+jint v4l2_initDevice(JNIEnv *env, jobject this, jstring device, jint deviceNumber)
 {
         int ret, i;
 
 	jstring name;
-	jobject bytebuffer;
 
 	const jbyte *str;
 	struct vdevice *dev;	
 
         struct v4l2_capability capabilities;	
-	struct v4l2_requestbuffers buffers;
-        struct v4l2_buffer buffer;
-	struct v4l2_format format;
 
 	memset(&capabilities, 0, sizeof(struct v4l2_capability));
-        memset(&buffers, 0, sizeof(struct v4l2_requestbuffers));
-	memset(&format, 0, sizeof(struct v4l2_format));
 
 	str = (*env)->GetStringUTFChars(env, device, NULL);
 
@@ -818,30 +814,83 @@ printf("Opening V4L2 webcam %s\n", str);
 	// Inform Java of the supported video formats 
         forward_formats(env, this, dev);
 
-	// Apparently, some devices must be configured before we can get the 
-        // buffers..
-//	ret = ioctl(dev->filedescriptor, VIDIOC_G_FMT, &format);
-   
-//	if (ret < 0) {
-//		fprintf(stderr, "G_FMT failed\n"); 
-		// ignore if this occurs
-//	} else { 
-//		fprinf(stderr, "Default palette: %d\n" + 
-//format.fmt.pix.pixelformat); 
-//	}
+	// NOTE: we stop the configuration here. The device has not yet been 
+        // configured to use a specific resolution or palette, nor have any 
+        // buffers been allocated. We pospone this, since we do not yet know 
+        // which resolution/palette the user prefers. In addition, some webcam 
+        // drivers do not seem to like it when an oversized buffer is used. 
 
-	// Set the resolution (palette remains unchanged)
+	// Store the device info
+	video_devices[(int) deviceNumber] = dev;
+
+	return 0;
+}
+
+jint v4l2_configureDevice(JNIEnv *env, jobject this, struct vdevice *dev, jint width, jint height, jint palette, jint fps, jint quality, jint bufferCount) 
+{
+	int ret, i;
+
+	jobject bytebuffer;
+
+	struct v4l2_format format;
+	struct v4l2_streamparm stream;
+        struct v4l2_jpegcompression compression;
+	struct v4l2_requestbuffers buffers;
+        struct v4l2_buffer buffer;
+
+	memset(&format, 0, sizeof(struct v4l2_format));
+	memset(&stream, 0, sizeof(struct v4l2_streamparm));
+        memset(&buffers, 0, sizeof(struct v4l2_requestbuffers));
+
+	// NOTE: if the device is already configured, we need to unmap old buffers before mapping new ones!
+fprintf(stderr, "FIXME: configure device incomplete!\n");
+	
+	//if (DEBUG) { 
+		fprintf(stderr, "Configure V4L2 device to use %dx%d @ %d fps, palette %d\n", width, height, fps, palette);
+	//}
+
+	// Set the resolution and palette
 	format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    	format.fmt.pix.width = 1600;
-    	format.fmt.pix.height = 1200;
+    	format.fmt.pix.width = width;
+    	format.fmt.pix.height = height;
+    	format.fmt.pix.pixelformat = palette;
     	format.fmt.pix.field = V4L2_FIELD_ANY;
-	format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;   
-
-	ret = ioctl(dev->filedescriptor, VIDIOC_S_FMT, &format);
    
+	ret = ioctl(dev->filedescriptor, VIDIOC_S_FMT, &format);
+
+fprintf(stderr, "V4L2 device returned a resolution of %dx%d bytes per image: %d\n", format.fmt.pix.width, format.fmt.pix.height, format.fmt.pix.sizeimage);
+
 	if (ret < 0) {
-		fprintf(stderr, "S_FMT failed\n"); 
-		// ignore if this occurs
+fprintf(stderr, "S_FMT failed\n");
+	   	return -5;
+	}
+
+        // Set the framerate
+	stream.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    	stream.parm.capture.timeperframe.numerator = 1;
+    	stream.parm.capture.timeperframe.denominator = fps;
+    
+	ret = ioctl(dev->filedescriptor, VIDIOC_S_PARM, &stream); 
+
+fprintf(stderr, "V4L2 device returned a framerate of %d/%d, number of buffers %d\n", stream.parm.capture.timeperframe.numerator, stream.parm.capture.timeperframe.denominator, stream.parm.capture.readbuffers);
+
+	if (ret < 0) {
+fprintf(stderr, "S_PARM failed\n");
+	   	return 0;
+	}
+
+	if (quality >= 0 && quality <= 65535) { 
+		compression.quality = quality;		 
+		compression.APPn = 0;
+		compression.APP_len = 0;
+		compression.COM_len = 0;
+	/*
+		ret = ioctl(dev->filedescriptor, VIDIOC_S_JPEGCOMP, &compression); 
+
+		if (ret < 0) {
+			fprintf(stderr, "S_COMP failed\n");
+		}
+*/
 	}
 
 	// Allocate the buffers
@@ -856,6 +905,7 @@ printf("Opening V4L2 webcam %s\n", str);
     	ret = ioctl(dev->filedescriptor, VIDIOC_REQBUFS, &buffers);
     
 	if (ret < 0) {
+fprintf(stderr, "VIDIOC_REQBUFS failed\n");
 	   	return -8;
 	}
 
@@ -877,10 +927,14 @@ printf("Opening V4L2 webcam %s\n", str);
             	ret = ioctl(dev->filedescriptor, VIDIOC_QUERYBUF, &buffer);
         
             	if (ret < 0) {
+fprintf(stderr, "VIDIOC_QUERYBUF failed\n");
 			return -1;
             	}
      
             	dev->buffer_length[i] = buffer.length;
+
+printf("Buffer %d length %d\n", i, buffer.length);
+
 	    	dev->buffers[i] = mmap(0, buffer.length, PROT_READ | PROT_WRITE, MAP_SHARED, dev->filedescriptor, buffer.m.offset);
 
 	    	if (dev->buffers[i] == MAP_FAILED) {
@@ -919,69 +973,7 @@ printf("Opening V4L2 webcam %s\n", str);
 		}
 	}
 
-	// Store the device info
-	video_devices[(int) deviceNumber] = dev;
-
-	return 0;
-}
-
-jint v4l2_configureDevice(JNIEnv *env, jobject this, struct vdevice *dev, jint width, jint height, jint palette, jint fps, jint quality) 
-{
-	int ret, i;
-
-	struct v4l2_format format;
-	struct v4l2_streamparm stream;
-        struct v4l2_jpegcompression compression;
-
-	memset(&format, 0, sizeof(struct v4l2_format));
-	memset(&stream, 0, sizeof(struct v4l2_streamparm));
-	
-	//if (DEBUG) { 
-		fprintf(stderr, "Configure V4L2 device to use %dx%d @ %d fps, palette %d\n", width, height, fps, palette);
-	//}
-
-	// Set the resolution and palette
-	format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    	format.fmt.pix.width = width;
-    	format.fmt.pix.height = height;
-    	format.fmt.pix.pixelformat = palette;
-    	format.fmt.pix.field = V4L2_FIELD_ANY;
-   
-	ret = ioctl(dev->filedescriptor, VIDIOC_S_FMT, &format);
-
-		fprintf(stderr, "V4L2 device returned a resolution of %dx%d\n", format.fmt.pix.width, format.fmt.pix.height);
-
-	if (ret < 0) {
-fprintf(stderr, "S_FMT failed\n");
-	   	return -5;
-	}
-
-        // Set the framerate
-	stream.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    	stream.parm.capture.timeperframe.numerator = 1;
-    	stream.parm.capture.timeperframe.denominator = fps;
-    
-	ret = ioctl(dev->filedescriptor, VIDIOC_S_PARM, &stream); 
-
-	if (ret < 0) {
-fprintf(stderr, "S_PARM failed\n");
-	   	return 0;
-	}
-
-	if (quality >= 0 && quality <= 65535) { 
-		compression.quality = quality;		 
-		compression.APPn = 0;
-		compression.APP_len = 0;
-		compression.COM_len = 0;
-	
-		ret = ioctl(dev->filedescriptor, VIDIOC_S_JPEGCOMP, &compression); 
-
-		if (ret < 0) {
-			fprintf(stderr, "S_COMP failed\n");
-		   	return 0;
-		}
-	}
-
+	dev->configured = 1;
         return 0;
 }
 
@@ -994,6 +986,8 @@ jint v4l2_grab(JNIEnv *env, jobject this, struct vdevice *dev)
 	jboolean more;
 
         struct v4l2_buffer buffer;
+
+printf("v4l2 grab\n");
 
 	more = JNI_TRUE;
 
@@ -1013,6 +1007,8 @@ jint v4l2_grab(JNIEnv *env, jobject this, struct vdevice *dev)
 	// Start the video stream
 	opcode = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
+printf("Doning streamon\n");
+
         ret = ioctl(dev->filedescriptor, VIDIOC_STREAMON, &opcode);
   
         if (ret < 0) {
@@ -1020,9 +1016,9 @@ jint v4l2_grab(JNIEnv *env, jobject this, struct vdevice *dev)
             	return -5;
     	}
 
-	if (DEBUG) { 
+//	if (DEBUG) { 
 		printf("START GRABBING!!!\n");
-  	}
+//  	}
 
 	// Keep grabbing frames until we are told to stop!
 	while (more == JNI_TRUE) { 
@@ -1034,17 +1030,21 @@ jint v4l2_grab(JNIEnv *env, jobject this, struct vdevice *dev)
 		buffer.index = dev->next_buffer;
 
 		dev->next_buffer = (dev->next_buffer + 1) % dev->available_buffers;
-    
+  
+//printf("DQBUF!!!\n");
+  
 		ret = ioctl(dev->filedescriptor, VIDIOC_DQBUF, &buffer);
+
+
    
 		if (ret < 0) {
-			if (DEBUG) {
+//			if (DEBUG) {
        	   			printf("Unable to dequeue buffer (%d %d %d %d %d).\n", errno, EAGAIN, EINVAL, ENOMEM, EIO);
-       			}
+//     			}
 	 	} else {
 
 			if (DEBUG) { 
-				printf("GOT IMAGE!!!\n");
+				printf("GOT IMAGE size %d!\n", buffer.bytesused);
 			}
 
 			// Forward the buffer index and size of the new frame to Java
@@ -1056,16 +1056,16 @@ jint v4l2_grab(JNIEnv *env, jobject this, struct vdevice *dev)
 			ret = ioctl(dev->filedescriptor, VIDIOC_QBUF, &buffer);
    
 			if (ret < 0) {
-				if (DEBUG) { 
+//				if (DEBUG) { 
 	       				printf("Unable to requeue buffer (%d).\n", errno);
-				}
+//				}
 			}
 		}
 	}
 
-	if (DEBUG) {
+//	if (DEBUG) {
 		printf("STOP GRABBING!!!\n");
-	}
+//	}
 
 	// Stop the video stream
 	opcode = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -1073,9 +1073,9 @@ jint v4l2_grab(JNIEnv *env, jobject this, struct vdevice *dev)
 	ret = ioctl(dev->filedescriptor, VIDIOC_STREAMOFF, &opcode);
    
 	if (ret < 0) {
-		if (DEBUG) { 
+//		if (DEBUG) { 
         		printf("Unable to %s capture: %d.\n", "stop", errno);
-        	}
+//        	}
 		return -5;
     	}
 	
@@ -1089,18 +1089,18 @@ jint v4l2_grab(JNIEnv *env, jobject this, struct vdevice *dev)
 
 
 
-jint Java_ibis_video4j_devices_video4linux_Video4LinuxDevice_initDevice(JNIEnv *env, jobject this, jstring device, jint deviceNumber, jint api, jint bufferCount)
+jint Java_ibis_video4j_devices_video4linux_Video4LinuxDevice_initDevice(JNIEnv *env, jobject this, jstring device, jint deviceNumber, jint api)
 {
 	if (api == 1) { 
 		return v4l_initDevice(env, this, device, deviceNumber);
 	} else if (api == 2){ 
-		return v4l2_initDevice(env, this, device, deviceNumber, bufferCount);
+		return v4l2_initDevice(env, this, device, deviceNumber);
 	}
 
 	return -10;
 }
 
-jint Java_ibis_video4j_devices_video4linux_Video4LinuxDevice_configureDevice(JNIEnv *env, jobject this, jint deviceNumber, jint width, jint height, jint palette, jint fps, jint quality)
+jint Java_ibis_video4j_devices_video4linux_Video4LinuxDevice_configureDevice(JNIEnv *env, jobject this, jint deviceNumber, jint width, jint height, jint palette, jint fps, jint quality, jint bufferCount)
 {
 	struct vdevice *dev;	
 
@@ -1114,7 +1114,7 @@ jint Java_ibis_video4j_devices_video4linux_Video4LinuxDevice_configureDevice(JNI
 	if (dev->v4l == 1) { 
 		return v4l_configureDevice(env, this, dev, width, height, palette);
 	} else if (dev->v4l == 2) { 
-		return v4l2_configureDevice(env, this, dev, width, height, palette, fps, quality);
+		return v4l2_configureDevice(env, this, dev, width, height, palette, fps, quality, bufferCount);
 	}
 
 fprintf(stderr, "####### configuring device FAILED %d\n", dev->v4l); 
@@ -1132,6 +1132,11 @@ jint Java_ibis_video4j_devices_video4linux_Video4LinuxDevice_grab(JNIEnv *env, j
 
 	if (dev == NULL) { 
 		return -11;
+	}
+
+	// Check if the device has already been configured (i.e., resolution, palette and buffers are set). 
+	if (dev->configured == 0) { 
+		return -12;
 	}
 
 	if (dev->v4l == 1) { 

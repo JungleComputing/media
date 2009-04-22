@@ -16,8 +16,10 @@ public abstract class VideoSource extends Thread {
     private boolean done = false;
     private boolean closed = false;
     
+    /*
     private int [] emptyBuffer;
     private int [] fullBuffer;
+    */
     
     protected VideoSource(VideoConsumer consumer, int width, int height, 
             int delay, double quality) {
@@ -49,6 +51,7 @@ public abstract class VideoSource extends Thread {
     
     protected abstract void grab();
        
+    /*
     public synchronized void returnBuffer(int [] pixels) { 
         emptyBuffer = pixels;
     }
@@ -93,6 +96,7 @@ public abstract class VideoSource extends Thread {
         
         return tmp;
     }
+    */
     
     protected synchronized void initialized(boolean succes) { 
         this.initialized = true;
@@ -137,13 +141,22 @@ public abstract class VideoSource extends Thread {
     
     public void run() { 
 
+        System.out.println("Starting videosource...");
+        
         waitForInitialization();
         
         if (!succes) { 
+            System.out.println("Failed to starting videosource!");
+            
             return;
         }
         
+        
+        
         while (!getDone()) { 
+        
+            System.out.println("Grabbing!");
+            
             grab();
         }
         

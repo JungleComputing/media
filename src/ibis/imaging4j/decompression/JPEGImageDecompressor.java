@@ -7,12 +7,10 @@ import ibis.imaging4j.ImageDecompressor;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferUShort;
 import java.awt.image.PixelInterleavedSampleModel;
 import java.awt.image.Raster;
 import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
-import java.text.Normalizer.Form;
 import java.util.Iterator;
 
 import javax.imageio.IIOException;
@@ -50,12 +48,25 @@ public class JPEGImageDecompressor implements ImageDecompressor {
     
     public Image decompress(Image cim) throws Exception { 
 
-        if (cim.getFormat() != Format.JPG) { 
+        Format src = cim.getFormat();
+        
+        if (src != Format.JPG && src != Format.MJPG) { 
             throw new Exception("JPG Decompressor cannot handle " + cim.getFormat());
         }
 
         // FIXME: This may fail!        
-        byte [] tmp = cim.getData().array();
+        
+        ByteBuffer dataIn = cim.getData();
+        
+        byte [] tmp = null;
+        
+        if (dataIn.hasArray()) { 
+            tmp = cim.getData().array();
+        } else { 
+            // FIXME: EEP were making a copy here!
+            tmp = new byte[dataIn.limit()];
+            dataIn.get(tmp);
+        }
         
         ByteArrayInputStream in = 
             new ByteArrayInputStream(tmp);

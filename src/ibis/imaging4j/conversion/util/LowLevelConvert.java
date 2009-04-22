@@ -1,6 +1,5 @@
 package ibis.imaging4j.conversion.util;
 
-import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
@@ -223,21 +222,41 @@ public class LowLevelConvert {
         out.position(0);
         out.limit(out.capacity());
         
-        System.out.println("Converting: " + in.capacity() + " -> " + out.capacity()); 
+      //  System.out.println("Converting: " + in.capacity() + " -> " + out.capacity()); 
         
         for (int h=0;h<height;h++) { 
             for (int w=0;w<width*2;w+=4) {
                 
                 in.get(tmpIn);
                 
-                tmpOut[1] = (byte) clipAndScale(tmpIn[0] + (1.370705 * (tmpIn[3]-128)));
-                tmpOut[2] = (byte) clipAndScale(tmpIn[0] - (0.698001 * (tmpIn[3]-128)) - (0.337633 * (tmpIn[1]-128)));
-                tmpOut[3] = (byte) clipAndScale(tmpIn[0] + + (1.732446 * (tmpIn[1]-128)));                
+                int Y1 = (0xff & tmpIn[0]);
+                int U  = (0xff & tmpIn[1]) - 128;
+                int Y2 = (0xff & tmpIn[2]);
+                int V  = (0xff & tmpIn[3]) - 128;
                 
-                tmpOut[5] = (byte) clipAndScale(tmpIn[2] + (1.370705 * (tmpIn[3]-128)));
-                tmpOut[6] = (byte) clipAndScale(tmpIn[2] - (0.698001 * (tmpIn[3]-128)) - (0.337633 * (tmpIn[1]-128)));
-                tmpOut[7] = (byte) clipAndScale(tmpIn[2] + (1.732446 * (tmpIn[1]-128)));                 
-                                 
+                tmpOut[1] = (byte) clipAndScale(Y1 + (1.370705 * V));
+                tmpOut[2] = (byte) clipAndScale(Y1 - (0.698001 * V) - (0.337633 * U));
+                tmpOut[3] = (byte) clipAndScale(Y1 + + (1.732446 * U));                
+                
+                tmpOut[5] = (byte) clipAndScale(Y2 + (1.370705 * V));
+                tmpOut[6] = (byte) clipAndScale(Y2 - (0.698001 * V) - (0.337633 * U));
+                tmpOut[7] = (byte) clipAndScale(Y2 + (1.732446 * U));                 
+                 
+                /*
+                final int Y1 = (0xff & tmpIn[0]);
+                final int U  = (0xff & tmpIn[1]);
+                final int Y2 = (0xff & tmpIn[2]);
+                final int V  = (0xff & tmpIn[3]);
+                
+                tmpOut[1] = clipAndScale((298 * Y1 + 409 * U + 128) >> 8);
+                tmpOut[5] = clipAndScale((298 * Y2 + 409 * U + 128) >> 8);
+
+                tmpOut[2] = clipAndScale((298 * Y1 - 100 * V - 208 * U + 128) >> 8);
+                tmpOut[6] = clipAndScale((298 * Y2 - 100 * V - 208 * U + 128) >> 8);
+
+                tmpOut[2] = clipAndScale((298 * Y1 + 516 * V + 128) >> 8);
+                tmpOut[7] = clipAndScale((298 * Y2 + 516 * V + 128) >> 8);
+                 */
                 out.put(tmpOut);
             }
         } 

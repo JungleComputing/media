@@ -1,5 +1,5 @@
-package ibis.video4j.devices.video4linux;
 
+package ibis.video4j.devices.video4linux;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -138,11 +138,10 @@ public class Video4LinuxDevice extends VideoSource {
         } 
     }
     
-    private native int initDevice(String device, int deviceNumber, 
-            int api, int buffers);
+    private native int initDevice(String device, int deviceNumber, int api);
    
     private native int configureDevice(int deviceNumber, int width, 
-            int height, int palette, int fps, int quality);
+            int height, int palette, int fps, int quality, int buffers);
     
     private native int closeDevice(int deviceNumber);
     
@@ -165,15 +164,12 @@ public class Video4LinuxDevice extends VideoSource {
     private int currentHeight; 
     private int currentWidth; 
     
-    private int availablePalette; 
-    
     private ByteBuffer [] buffers;
     private Image [] images; 
     
-    private Format currentPalette;
+    private Format currentFormat;
     private int nativeFormat;
-    //private Convertor paletteConvertor;
-    
+
     public Video4LinuxDevice(VideoConsumer consumer, int deviceNumber, 
             int width, int height, int delay, int api, Format format, 
             double quality) throws Exception {        
@@ -189,9 +185,9 @@ public class Video4LinuxDevice extends VideoSource {
         // TODO check if these setting are supported!!!!
         currentWidth = width;
         currentHeight = height;
-        currentPalette = format;
+        currentFormat = format;
         
-        int result = initDevice(device, deviceNumber, api, DEFAULT_BUFFERS);
+        int result = initDevice(device, deviceNumber, api);
         
         if (result == 0) { 
             System.out.println("Video4Linux device initialized");
@@ -202,7 +198,7 @@ public class Video4LinuxDevice extends VideoSource {
         }
         
         nativeFormat = -1;
-        
+
         if (api == 1) { 
             nativeFormat = Video4LinuxFormat.getNativeIndexV4L1(format);
         } else { 
@@ -215,7 +211,7 @@ public class Video4LinuxDevice extends VideoSource {
         
         int compressionQuality = -1;
         
-        if (currentPalette.compressed) { 
+        if (format.compressed) { 
             
             compressionQuality = (int) (65535 * (quality / 100.0));
             
@@ -229,7 +225,7 @@ public class Video4LinuxDevice extends VideoSource {
         }
         
         result = configureDevice(deviceNumber, currentWidth, currentHeight, 
-                nativeFormat, 30, compressionQuality);      
+                nativeFormat, 30, compressionQuality, DEFAULT_BUFFERS);      
    
         if (result == 0) { 
             System.out.println("Video4Linux device configured");
@@ -343,7 +339,10 @@ public class Video4LinuxDevice extends VideoSource {
     @SuppressWarnings("unused")
     private void addBuffer(int index, ByteBuffer buffer) {         
         buffers[index] = buffer;        
-        images[index] = new Image(currentPalette, currentWidth, currentHeight, buffer);
+        
+        System.out.println("Creating image of " + currentWidth + " x " + currentHeight);
+        
+        images[index] = new Image(currentFormat, currentWidth, currentHeight, buffer);
         System.out.println("GOT BUFFER " + index + " of size " + buffer.capacity());
     } 
     
@@ -360,20 +359,25 @@ public class Video4LinuxDevice extends VideoSource {
         tmp.position(0);
         tmp.limit(size);
                 
-        consumer.gotImage(images[index]);       
+        Image img = images[index];
+        
+       // System.out.println("Image has size " + img.getWidth() + " x " + img.getHeight());
+        
+        consumer.gotImage(img);       
         
         /*
         int [] pixels = consumer.getBuffer(currentWidth, currentHeight, index);
         
         // Is this correct ?
         ByteBuffer tmp = buffers[index];
-        tmp.rewind();    
+        tmp.position(0);
+        tmp.limit(size);
         
         if (paletteConvertor != null) { 
             paletteConvertor.convert(width, height, tmp, pixels);
         } else { 
             System.out.println("Unsupported palette conversion:" 
-                    + currentPalette.getName() + " to RGB32");
+                    + inputPalette.getName() + " to RGB32");
         }
                 
         consumer.gotImage(pixels, index);       
@@ -433,7 +437,7 @@ public class Video4LinuxDevice extends VideoSource {
         
         int compressionQuality = -1;
         
-        if (currentPalette.compressed) { 
+        if (currentFormat.compressed) { 
         
             if (quality < 0 || quality > 100) {
                 compressionQuality = (int) (65535 * (compressionQuality / 100.0));
@@ -451,7 +455,7 @@ public class Video4LinuxDevice extends VideoSource {
         }
         
         configureDevice(deviceNumber, width, height, 
-                nativeFormat, 30, compressionQuality);
+                nativeFormat, 30, compressionQuality, DEFAULT_BUFFERS);
     }
     
     public String toString() { 
@@ -483,8 +487,8 @@ public class Video4LinuxDevice extends VideoSource {
 */
         s.append("\n");
 
-        if (currentPalette != null) { 
-            s.append(" grab    : " + currentPalette.getDescription());
+        if (currentFormat != null) { 
+            s.append(" grab    : " + currentFormat.getDescription());
         }    
     
         return s.toString();
