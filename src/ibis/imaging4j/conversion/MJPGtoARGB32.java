@@ -1,5 +1,6 @@
 package ibis.imaging4j.conversion;
 
+import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 
 import javax.imageio.IIOException;
@@ -38,9 +39,26 @@ public class MJPGtoARGB32 extends Convertor {
             ByteBuffer buf = in.getData();
             byte [] tmp = new byte[buf.limit()];
             buf.get(tmp);
+  
+            System.out.println("Size: " + tmp.length);
             
-            dec.RTjpeg_init_decompress(tmp, in.getWidth(), in.getHeight());
-            dec.RTjpeg_decompress(tmp, out.getData().array());
+            for (int i=0;i<20;i++) {
+            	int c = (tmp[i] & 0xFF);
+            	
+            	System.out.print(" " + c);
+           	
+            }
+            
+            System.out.println();
+          
+            FileOutputStream o = new FileOutputStream("eep.jpg");
+            o.write(tmp);
+            o.close();
+            
+            System.exit(1);
+            
+//            dec.RTjpeg_init_decompress(tmp, in.getWidth(), in.getHeight());
+//            dec.RTjpeg_decompress(tmp, out.getData().array());
             
             return out;
             
