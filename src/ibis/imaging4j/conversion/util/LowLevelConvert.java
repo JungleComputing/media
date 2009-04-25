@@ -64,7 +64,7 @@ public class LowLevelConvert {
 
         final int size = width * height * 3;
 
-        System.out.println("Converting " + size);
+     //   System.out.println("Converting " + size);
 
         in.limit(width * height * 3);
         in.position(0);
@@ -77,6 +77,12 @@ public class LowLevelConvert {
         
         for (int i=0;i<size;i+=3) { 
             in.get(tmp, 1, 3);
+            
+            // Swap R and B
+            byte x = tmp[1];
+            tmp[1] = tmp[3];
+            tmp[3] = x;
+            
             out.put(tmp);
         }
     }
