@@ -85,7 +85,7 @@ public class MJPGtoJPG extends Convertor {
             if (!isHuffmann(tmp)) { 
                 // We need to insert the hufmann table
 
-    System.out.println("!ishufmann");
+   // System.out.println("!ishufmann");
                 
                 ByteBuffer dst = null;
 
@@ -120,7 +120,7 @@ public class MJPGtoJPG extends Convertor {
                     value = ((0xff & tmp.get(index)) << 8) | (0xff & tmp.get(index+1));
                 }
 
-                System.out.println("Index = " + index);
+        //        System.out.println("Index = " + index);
                 
                 tmp.position(0);
                 tmp.limit(index);
@@ -139,7 +139,7 @@ public class MJPGtoJPG extends Convertor {
             } else { 
                 // We can directly copy the data since it already contains a jpg file.
 
-    System.out.println("ishufmann");
+    //System.out.println("ishufmann");
                 
                 ByteBuffer dst = null;
 

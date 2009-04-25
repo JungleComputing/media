@@ -35,14 +35,14 @@ public class MJPGtoARGB32 extends Convertor {
         try { 
             Image tmp2 = dec2.decompress(tmp);
       
-      System.out.println("GOT image in " + tmp2.getFormat());      
+   //   System.out.println("GOT image in " + tmp2.getFormat());      
             
             if (tmp2.getFormat() != Format.ARGB32) { 
                 
                 Convertor c = Conversion.getConvertor(tmp2.getFormat(), Format.ARGB32);
                
                 
-    System.out.println("Convert " + tmp2.getFormat() + " to Format.ARGB32 " + out);      
+  //  System.out.println("Convert " + tmp2.getFormat() + " to Format.ARGB32 " + out);      
                 
                 return c.convert(tmp2, out);
             }
