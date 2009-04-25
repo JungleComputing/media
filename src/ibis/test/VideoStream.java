@@ -5,9 +5,7 @@ package ibis.test;
 
 import ibis.imaging4j.Conversion;
 import ibis.imaging4j.Format;
-import ibis.imaging4j.conversion.ConversionException;
 import ibis.imaging4j.conversion.Convertor;
-import ibis.imaging4j.conversion.util.LowLevelConvert;
 import ibis.video4j.VideoConsumer;
 import ibis.video4j.VideoDeviceFactory;
 import ibis.video4j.devices.VideoSource;
@@ -20,16 +18,10 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.Shape;
-import java.awt.Transparency;
-import java.awt.color.ColorSpace;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
 import java.awt.image.MemoryImageSource;
-import java.awt.image.PackedColorModel;
 import java.nio.ByteBuffer;
 
 import javax.swing.BorderFactory;

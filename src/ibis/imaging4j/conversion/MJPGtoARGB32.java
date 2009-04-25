@@ -1,71 +1,61 @@
 package ibis.imaging4j.conversion;
 
-import java.io.FileOutputStream;
-import java.nio.ByteBuffer;
-
-import javax.imageio.IIOException;
-
+import ibis.imaging4j.Conversion;
 import ibis.imaging4j.Format;
 import ibis.imaging4j.Image;
 import ibis.imaging4j.decompression.JPEGImageDecompressor;
-import ibis.imaging4j.decompression.MJPEGDecompressor;
+
+import javax.imageio.IIOException;
 
 public class MJPGtoARGB32 extends Convertor {
 
+    // FIXME: This is extremely expensive at the moment!
+    
     private final static int COST = 1000;
     
-    private final MJPEGDecompressor dec;
+    private final MJPGtoJPG dec;
+    
+    private final JPEGImageDecompressor dec2;
     
     public MJPGtoARGB32() throws IIOException {
         super(COST);
-        
-        dec = new MJPEGDecompressor();
+        dec = new MJPGtoJPG();
+        dec2 = new JPEGImageDecompressor();
     }
 
     @Override
     public Image convert(Image in, Image out) throws ConversionException {
        
-        if (out == null) {
-            out = new Image(Format.ARGB32, in.getWidth(), in.getHeight());
-        } else { 
-            if (out.getWidth() != in.getWidth() || 
-                    out.getHeight() != in.getHeight()) { 
-                throw new ConversionException("Target image has wrong dimensions!");
-            }
-        }
-   
+        // First convert MJPEG to JPG. This is basically a copy which may insert 
+        // some missing table data if needed.
+        Image tmp = dec.convert(in, null);
+
+        // Next decompress the JPG. We currently don't have an implementation that
+        // decompresses to an existsing image...
         try { 
-   
-            ByteBuffer buf = in.getData();
-            byte [] tmp = new byte[buf.limit()];
-            buf.get(tmp);
-  
-            System.out.println("Size: " + tmp.length);
+            Image tmp2 = dec2.decompress(tmp);
+      
+      System.out.println("GOT image in " + tmp2.getFormat());      
             
-            for (int i=0;i<20;i++) {
-            	int c = (tmp[i] & 0xFF);
-            	
-            	System.out.print(" " + c);
-           	
+            if (tmp2.getFormat() != Format.ARGB32) { 
+                
+                Convertor c = Conversion.getConvertor(tmp2.getFormat(), Format.ARGB32);
+               
+                
+    System.out.println("Convert " + tmp2.getFormat() + " to Format.ARGB32 " + out);      
+                
+                return c.convert(tmp2, out);
             }
             
-            System.out.println();
-          
-            FileOutputStream o = new FileOutputStream("eep.jpg");
-            o.write(tmp);
-            o.close();
+            if (out == null) { 
+                return tmp2;
+            }
             
-            System.exit(1);
-            
-//            dec.RTjpeg_init_decompress(tmp, in.getWidth(), in.getHeight());
-//            dec.RTjpeg_decompress(tmp, out.getData().array());
-            
+            Image.copy(tmp2, out);
             return out;
             
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new ConversionException("Failed to decode MJPEG", e);
-            
+            throw new ConversionException("Failed to convert to JPG", e);
         }
     }
 }

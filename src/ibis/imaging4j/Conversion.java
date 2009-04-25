@@ -5,6 +5,7 @@ import ibis.imaging4j.conversion.ARGB32toBufferedImage;
 import ibis.imaging4j.conversion.Convertor;
 import ibis.imaging4j.conversion.ConvertorToBufferedImage;
 import ibis.imaging4j.conversion.MJPGtoARGB32;
+import ibis.imaging4j.conversion.MJPGtoJPG;
 import ibis.imaging4j.conversion.RGB24toARGB32;
 import ibis.imaging4j.conversion.RGB24toBufferedImage;
 import ibis.imaging4j.conversion.YUV420SPtoBufferedImage;
@@ -70,7 +71,9 @@ public class Conversion {
 
             addConvertor(Format.ARGB32, new ARGB32toBufferedImage());
 
+            addConvertor(Format.MJPG, Format.JPG, new MJPGtoJPG());
             addConvertor(Format.MJPG, Format.ARGB32, new MJPGtoARGB32());
+            
         } catch (Exception e) {
             System.err.println("Failed to load convertors!" + e);
             e.printStackTrace();

@@ -24,7 +24,7 @@ public class RGB24toARGB32 extends Convertor {
             }
         }
     
-        LowLevelConvert.RGB24toARGB32(in.getData(), out.getData());
+        LowLevelConvert.RGB24toARGB32(in.getWidth(), in.getHeight(), in.getData(), out.getData());
         
         return out;
     }

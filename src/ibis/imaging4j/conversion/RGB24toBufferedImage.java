@@ -23,7 +23,7 @@ public class RGB24toBufferedImage implements ConvertorToBufferedImage {
             
         int [] tmp = new int[width*height];
 
-        LowLevelConvert.RGB24toARGB32(data, tmp);
+        LowLevelConvert.RGB24toARGB32(in.getWidth(), in.getHeight(), data, tmp);
 
         b.setRGB(0, 0, width, height, tmp, 0, width);  
         return b; 

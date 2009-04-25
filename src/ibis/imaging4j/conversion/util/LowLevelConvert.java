@@ -44,9 +44,9 @@ public class LowLevelConvert {
         }
     }
 
-    public static final void RGB24toARGB32(ByteBuffer in, int [] rgbOut) { 
+    public static final void RGB24toARGB32(int width, int height, ByteBuffer in, int [] rgbOut) { 
 
-        final int size = in.remaining();
+        final int size = width * height * 3;
 
         int index = 0;
 
@@ -60,10 +60,18 @@ public class LowLevelConvert {
         }
     }
 
-    public static final void RGB24toARGB32(ByteBuffer in, ByteBuffer out) { 
+    public static final void RGB24toARGB32(int width, int height, ByteBuffer in, ByteBuffer out) { 
 
-        final int size = in.remaining();
+        final int size = width * height * 3;
 
+        System.out.println("Converting " + size);
+
+        in.limit(width * height * 3);
+        in.position(0);
+        
+        out.limit(width * height * 4);
+        out.position(0);
+        
         final byte [] tmp = new byte[4];
         tmp[0] = (byte) 0xFF;
         
