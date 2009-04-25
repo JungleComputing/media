@@ -136,6 +136,8 @@ class VideoStream extends JPanel implements VideoConsumer {
 
         //source.newPixels(0, 0, camWidth, camHeight);
 
+  //      System.out.println("Image size " + img.getData().limit());
+        
         if (image == 0) { 
             start = System.currentTimeMillis();
         } else if (image == 100) { 
