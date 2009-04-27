@@ -1,6 +1,9 @@
 package ibis.video4j.devices.video4linux;
 
+import java.util.HashMap;
+
 import ibis.imaging4j.Format;
+import ibis.video4j.Capability;
 import ibis.video4j.VideoDeviceDescription;
 
 public class Video4LinuxDeviceDescription extends VideoDeviceDescription {
@@ -10,10 +13,10 @@ public class Video4LinuxDeviceDescription extends VideoDeviceDescription {
     
     public Video4LinuxDeviceDescription(String deviceName, 
             String deviceDescription, int deviceNumber, 
-            Format [] formats, 
+            HashMap<Format, Capability> capabilities, 
             boolean V4L1Available, boolean V4L2Available) {
         
-        super(deviceName, deviceDescription, deviceNumber, formats);
+        super(deviceName, deviceDescription, deviceNumber, capabilities);
         
         this.V4L1Available = V4L1Available;
         this.V4L2Available = V4L2Available;

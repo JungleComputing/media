@@ -23,12 +23,12 @@ public class Video4LinuxDeviceFactory extends VideoDeviceFactory {
             (Video4LinuxDeviceDescription) devices[deviceNumber];
     
         if (d.V4L2Available) { 
-            return new Video4LinuxDevice(consumer, d.deviceNumber, width, 
+            return new Video4LinuxDevice(consumer, d, width, 
                     height, delay, 2, palette, quality);
         }
         
         if (d.V4L1Available) { 
-            return new Video4LinuxDevice(consumer, d.deviceNumber, width, 
+            return new Video4LinuxDevice(consumer, d, width, 
                     height, delay, 1, palette, quality);
         }
         
@@ -62,12 +62,12 @@ public class Video4LinuxDeviceFactory extends VideoDeviceFactory {
         }
         
         if (device.V4L2Available) { 
-            return new Video4LinuxDevice(consumer, device.deviceNumber, width, 
+            return new Video4LinuxDevice(consumer, device, width, 
                     height, delay, 2, palette, quality);
         }
         
         if (device.V4L1Available) { 
-            return new Video4LinuxDevice(consumer, device.deviceNumber, width, 
+            return new Video4LinuxDevice(consumer, device, width, 
                     height, delay, 1, palette, quality);
         }
         

@@ -1,10 +1,14 @@
 package ibis.video4j.devices;
 
 import ibis.video4j.VideoConsumer;
+import ibis.video4j.VideoDeviceDescription;
 
 public abstract class VideoSource extends Thread {
     
     protected final VideoConsumer consumer;
+    
+    protected final VideoDeviceDescription description;
+    
     protected final int width;
     protected final int height;
     protected final int delay;
@@ -21,10 +25,12 @@ public abstract class VideoSource extends Thread {
     private int [] fullBuffer;
     */
     
-    protected VideoSource(VideoConsumer consumer, int width, int height, 
+    protected VideoSource(VideoConsumer consumer, 
+    		VideoDeviceDescription description, int width, int height, 
             int delay, double quality) {
         
         this.consumer = consumer;
+        this.description = description;
         this.width = width;
         this.height = height;
         this.delay = delay;

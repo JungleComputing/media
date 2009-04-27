@@ -13,131 +13,6 @@ public class Video4LinuxDevice extends VideoSource {
     
     private static final int DEFAULT_BUFFERS = 4;
     
-    private static final int DISCRETE = 0;
-    private static final int CONTINUOUS = 1;
-    private static final int STEPWISE = 2;
-      
-    public class Resolution { 
-        
-        final int minW; 
-        final int minH;
-        
-        final int maxW; 
-        final int maxH;
-        
-        final int stepW;
-        final int stepH;
-        
-        public Resolution(int minW, int minH, int maxW, int maxH, int stepW, 
-                int stepH) { 
-            
-            this.minW = minW;
-            this.maxW = maxW;
-            this.minH = minH;
-            this.maxH = maxH;
-            this.stepW = stepW;
-            this.stepH = stepH;
-        }
-        
-        public Resolution(int minW, int minH, int maxW, int maxH) { 
-            this(minW, minH, maxW, maxH, 1, 1);
-        }
-       
-        public Resolution(int x, int y) { 
-            this(x, y, x, y, -1, -1);
-        }
-
-        @Override // Generated
-        public int hashCode() {
-            final int PRIME = 31;
-            int result = 1;
-            result = PRIME * result + maxH;
-            result = PRIME * result + maxW;
-            result = PRIME * result + minH;
-            result = PRIME * result + minW;
-            result = PRIME * result + stepH;
-            result = PRIME * result + stepW;
-            return result;
-        }
-
-        @Override // Generated
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            final Resolution other = (Resolution) obj;
-            if (maxH != other.maxH)
-                return false;
-            if (maxW != other.maxW)
-                return false;
-            if (minH != other.minH)
-                return false;
-            if (minW != other.minW)
-                return false;
-            if (stepH != other.stepH)
-                return false;
-            if (stepW != other.stepW)
-                return false;
-            return true;
-        }
-    }
-    
-    public class FrameRate { 
-        
-        final int numerator;
-        final int denominator;
-        
-        public FrameRate(int numerator, int denominator) { 
-            this.numerator = numerator;
-            this.denominator = denominator;
-        }    
-    }
-    
-    public class ResolutionCapability { 
-        
-        final Resolution resolution;
-        final ArrayList<FrameRate> rates;
-        
-        public ResolutionCapability(Resolution resolution) {
-            this.resolution = resolution;
-            this.rates = new ArrayList<FrameRate>();
-        }
-        
-        public void addFrameRate(FrameRate rate) { 
-            rates.add(rate);
-        } 
-    }
-
-    public class Capability { 
-        
-        final Format palette;
-        final ArrayList<ResolutionCapability> resolutions;
-        
-        public Capability(Format palette) {
-            this.palette = palette;
-            this.resolutions = new ArrayList<ResolutionCapability>();
-        }
-        
-        public void addFrameRate(Resolution resolution, FrameRate rate) { 
-          
-            for (ResolutionCapability r : resolutions) { 
-                
-                if (r.resolution.equals(resolution)) { 
-                    r.rates.add(rate);
-                    return;
-                }
-            }
-
-            // We only end up here if the resulotion was not found!
-            ResolutionCapability r = new ResolutionCapability(resolution);
-            r.rates.add(rate);
-            resolutions.add(r);
-        } 
-    }
-    
     private native int initDevice(String device, int deviceNumber, int api);
    
     private native int configureDevice(int deviceNumber, int width, 
@@ -147,14 +22,11 @@ public class Video4LinuxDevice extends VideoSource {
     
     private native int grab(int deviceNumber);
     
-    private HashMap<Format, Capability> capabilities = 
-        new HashMap<Format, Capability>();
-    
     private final String device; 
     private final int deviceNumber; 
     
     private String name; 
-      
+    
     private int minWidth; 
     private int maxWidth;
     
@@ -169,14 +41,15 @@ public class Video4LinuxDevice extends VideoSource {
     
     private Format currentFormat;
     private int nativeFormat;
-
-    public Video4LinuxDevice(VideoConsumer consumer, int deviceNumber, 
-            int width, int height, int delay, int api, Format format, 
+    
+    public Video4LinuxDevice(VideoConsumer consumer, 
+    		Video4LinuxDeviceDescription desc, 
+    		int width, int height, int delay, int api, Format format, 
             double quality) throws Exception {        
         
-        super(consumer, width, height, delay, quality);
+        super(consumer, desc, width, height, delay, quality);
     
-        this.deviceNumber = deviceNumber;
+        this.deviceNumber = desc.deviceNumber;
         this.device = "/dev/video" + deviceNumber;
         this.buffers = new ByteBuffer[DEFAULT_BUFFERS];
         
@@ -233,7 +106,6 @@ public class Video4LinuxDevice extends VideoSource {
             System.out.println("Video4Linux device configuration failed!");
             resultToException(result);
         }
-    
     }
     
     private void resultToException(int result) throws Exception { 
@@ -258,7 +130,7 @@ public class Video4LinuxDevice extends VideoSource {
     
     // This method is called from the native layer in response to the 
     // initialization of a device
-    @SuppressWarnings("unused")
+    /*@SuppressWarnings("unused")
     private void capability(int type, int palette, int minWidth, int minHeight, 
             int maxWidth, int maxHeight, int stepW, int stepH, int numerator, 
             int denominator) { 
@@ -326,6 +198,7 @@ public class Video4LinuxDevice extends VideoSource {
         
         this.name = name;
     }
+    */
     
     // This method is called from the native layer in response to the 
     // initialization of a device

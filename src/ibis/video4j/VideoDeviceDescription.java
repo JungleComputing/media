@@ -1,5 +1,7 @@
 package ibis.video4j;
 
+import java.util.HashMap;
+
 import ibis.imaging4j.Format;
 
 public class VideoDeviceDescription {
@@ -7,6 +9,9 @@ public class VideoDeviceDescription {
     public final String deviceName;
     public final String deviceDescription;
     public final int deviceNumber;
+    
+    private HashMap<Format, Capability> capabilities = 
+        new HashMap<Format, Capability>();
     
     private final Format [] formats;
     
@@ -19,12 +24,15 @@ public class VideoDeviceDescription {
      */
     public VideoDeviceDescription(final String deviceName, 
             final String deviceDescription, final int deviceNumber, 
-            final Format [] formats) {
+            final HashMap<Format, Capability> capabilities) {
         
         this.deviceName = deviceName;
         this.deviceDescription = deviceDescription;
         this.deviceNumber = deviceNumber;
-        this.formats = formats;
+        this.capabilities = capabilities;
+        
+        formats = capabilities.keySet().toArray(
+        		new Format[capabilities.size()]);
     }
     
     public String toString() { 

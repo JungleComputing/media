@@ -3,6 +3,7 @@ package ibis.video4j.devices.directshow;
 import java.nio.ByteBuffer;
 
 import ibis.video4j.VideoConsumer;
+import ibis.video4j.VideoDeviceDescription;
 import ibis.video4j.devices.VideoSource;
 
 public class DirectShowDevice extends VideoSource {
@@ -19,12 +20,13 @@ public class DirectShowDevice extends VideoSource {
     
     private ByteBuffer buffer;
     
-    public DirectShowDevice(VideoConsumer consumer, int deviceNumber, int width,
+    public DirectShowDevice(VideoConsumer consumer, VideoDeviceDescription desc,
+    		int width,
             int height, int delay, double quality) throws Exception {
 
-        super(consumer, width, height, delay, quality);
-
-        this.deviceNumber = deviceNumber;
+        super(consumer, desc, width, height, delay, quality);
+        
+        this.deviceNumber = desc.deviceNumber;
         
         int result = configureDevice(deviceNumber, width, height);
         

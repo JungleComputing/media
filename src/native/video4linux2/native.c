@@ -212,14 +212,14 @@ int freeDevice(struct vdevice *dev)
 // V4L1 Part
 // ================================================================================
 
-int scan_palette(JNIEnv *env, jobject this, struct vdevice *dev, struct video_capability *capabilities) 
+int scan_palette(JNIEnv *env, jobject this, int filedescriptor, struct video_capability *capabilities) 
 { 
         int i;
 	int result = -1;
         struct video_picture pict;
 
         /* initialize the internal struct */
-        if (ioctl (dev->filedescriptor, VIDIOCGPICT, &pict) < 0)
+        if (ioctl (filedescriptor, VIDIOCGPICT, &pict) < 0)
 	{
             	return -1;
         }
@@ -231,13 +231,13 @@ int scan_palette(JNIEnv *env, jobject this, struct vdevice *dev, struct video_ca
 	        pict.depth = v4l1_palette_depth[i];
 	
 		// Try to set it 
-		if (ioctl (dev->filedescriptor, VIDIOCSPICT, &pict) < 0)
+		if (ioctl (filedescriptor, VIDIOCSPICT, &pict) < 0)
                 {
 		        // failed -- ignore
                 }
 
 		// Try to get it
-	        if (ioctl (dev->filedescriptor, VIDIOCGPICT, &pict) < 0)
+	        if (ioctl (filedescriptor, VIDIOCGPICT, &pict) < 0)
                 {
         		// failed -- ignore
                 }
@@ -332,7 +332,8 @@ jint v4l_initDevice(JNIEnv *env, jobject this, jstring device, jint deviceNumber
             	printf("\n");
 	}
 
-	callbackDeviceName(env, this, (*env)->NewStringUTF(env, capabilities.name));
+// These have move to the discovery phase
+//	callbackDeviceName(env, this, (*env)->NewStringUTF(env, capabilities.name));
 
 	if (ioctl(dev->filedescriptor, VIDIOCGPICT, &(picture)) == -1) {
 		freeDevice(dev);
@@ -352,11 +353,11 @@ jint v4l_initDevice(JNIEnv *env, jobject this, jstring device, jint deviceNumber
         	printf("\n");
 	}
 
-        if (scan_palette(env, this, dev, &capabilities) == -1) { 
-		// No useful palette options found!
-		freeDevice(dev);
-		return -6;			
-	} 
+//        if (scan_palette(env, this, dev->filedescriptor, &capabilities) == -1) { 
+//		// No useful palette options found!
+//		freeDevice(dev);
+//		return -6;			
+//	} 
 
         if (ioctl(dev->filedescriptor, VIDIOCGMBUF, &(mbuf)) == -1) {
 		freeDevice(dev);
@@ -548,7 +549,7 @@ jint v4l_grab(JNIEnv *env, jobject this, struct vdevice *dev)
 // V4L2 Part
 // ================================================================================
 
-void forward_frame_intervals(JNIEnv *env, jobject this, struct vdevice *dev, __u32 format,  __u32 width, __u32 height) 
+void forward_frame_intervals(JNIEnv *env, jobject this, int filedescriptor, __u32 format,  __u32 width, __u32 height) 
 {
         int ret;
         struct v4l2_frmivalenum interval;
@@ -560,7 +561,7 @@ void forward_frame_intervals(JNIEnv *env, jobject this, struct vdevice *dev, __u
         interval.width = width;
         interval.height = height;
         
-        while ((ret = ioctl(dev->filedescriptor, VIDIOC_ENUM_FRAMEINTERVALS, &interval)) == 0) {
+        while ((ret = ioctl(filedescriptor, VIDIOC_ENUM_FRAMEINTERVALS, &interval)) == 0) {
                 if (interval.type == V4L2_FRMIVAL_TYPE_DISCRETE) {
 			callbackCapability(env, this, DISCRETE, format, width, height, 0, 0, 0, 0, 
                                 interval.discrete.numerator, interval.discrete.denominator);
@@ -576,7 +577,7 @@ void forward_frame_intervals(JNIEnv *env, jobject this, struct vdevice *dev, __u
         }
 }
 
-void forward_frame_sizes(JNIEnv *env, jobject this, struct vdevice *dev, __u32 format) 
+void forward_frame_sizes(JNIEnv *env, jobject this, int filedescriptor, __u32 format) 
 {
 	int ret;
         struct v4l2_frmsizeenum size;
@@ -586,9 +587,9 @@ void forward_frame_sizes(JNIEnv *env, jobject this, struct vdevice *dev, __u32 f
 	size.index = 0;
         size.pixel_format = format;
         
-	while ((ret = ioctl(dev->filedescriptor, VIDIOC_ENUM_FRAMESIZES, &size)) == 0) {
+	while ((ret = ioctl(filedescriptor, VIDIOC_ENUM_FRAMESIZES, &size)) == 0) {
                 if (size.type == V4L2_FRMSIZE_TYPE_DISCRETE) {
-           		forward_frame_intervals(env, this, dev, format, size.discrete.width, size.discrete.height);
+           		forward_frame_intervals(env, this, filedescriptor, format, size.discrete.width, size.discrete.height);
                 } else if (size.type == V4L2_FRMSIZE_TYPE_CONTINUOUS) {
 			// TODO: implement
  	         	printf("Unsupported format: continuous\n");
@@ -602,7 +603,7 @@ void forward_frame_sizes(JNIEnv *env, jobject this, struct vdevice *dev, __u32 f
         }
 }
 
-int forward_formats(JNIEnv *env, jobject this, struct vdevice *dev) 
+int forward_formats(JNIEnv *env, jobject this, int filedescriptor) 
 {
         int ret;
         struct v4l2_fmtdesc format;
@@ -612,9 +613,9 @@ int forward_formats(JNIEnv *env, jobject this, struct vdevice *dev)
         format.index = 0;
         format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-        while ((ret = ioctl(dev->filedescriptor, VIDIOC_ENUM_FMT, &format)) == 0) {
+        while ((ret = ioctl(filedescriptor, VIDIOC_ENUM_FMT, &format)) == 0) {
                 format.index++;
-		forward_frame_sizes(env, this, dev, format.pixelformat);
+		forward_frame_sizes(env, this, filedescriptor, format.pixelformat);
         }
 
         if (errno != EINVAL) {
@@ -808,11 +809,12 @@ printf("Opening V4L2 webcam %s\n", str);
         	}
 	}	
 
+// These have moved to the discovery phase...
 	// Inform Java of the device name 
-	callbackDeviceName(env, this, (*env)->NewStringUTF(env, capabilities.card)); 
+//	callbackDeviceName(env, this, (*env)->NewStringUTF(env, capabilities.card)); 
 
 	// Inform Java of the supported video formats 
-        forward_formats(env, this, dev);
+//        forward_formats(env, this, dev->filedescriptor);
 
 	// NOTE: we stop the configuration here. The device has not yet been 
         // configured to use a specific resolution or palette, nor have any 
@@ -1273,6 +1275,21 @@ jboolean Java_ibis_video4j_devices_video4linux_Video4LinuxDiscovery_testDevice(J
 	// Inform Java of the device information we found
         (*env)->CallVoidMethod(env, this, mid, device, name, deviceNumber, v4l1, v4l2);
  
+	if (v4l2 == JNI_TRUE) { 
+		// Inform Java of the supported video formats 
+		if (forward_formats(env, this, filedescriptor) != 0) {
+			// Failed to forward formats 
+			close(filedescriptor);
+			return JNI_FALSE;					
+		}
+	} else if (v4l1 == JNI_TRUE) { 
+	        if (scan_palette(env, this, filedescriptor, &capabilities_v4l1) == -1) { 
+			// No useful palette options found!
+			close(filedescriptor);
+			return JNI_FALSE;			
+		}	 
+	}
+
 	// Close the device and free all resources
 	close(filedescriptor);
 

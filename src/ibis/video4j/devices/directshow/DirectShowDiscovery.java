@@ -22,13 +22,18 @@ public class DirectShowDiscovery implements VideoDeviceDiscovery {
             
             String description = getDeviceName(i);  
 
-            if (description != null) { 
+            if (description != null) {
+            	
+            	//FIXME
+            	
+            	
                 devices.add(new VideoDeviceDescription("device" + i, 
                         description, i, 
-                        new Format [] { Format.RGB24 }));
+                        null));
             }
         
         }
+        
         return devices.toArray(new VideoDeviceDescription[devices.size()]);
     }
 }

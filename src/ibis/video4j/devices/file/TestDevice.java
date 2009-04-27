@@ -1,6 +1,7 @@
 package ibis.video4j.devices.file;
 
 import ibis.video4j.VideoConsumer;
+import ibis.video4j.VideoDeviceDescription;
 import ibis.video4j.devices.VideoSource;
 import ibis.video4j.utils.ImageUtils;
 
@@ -15,8 +16,9 @@ public class TestDevice extends VideoSource {
     
     private int index = 0;
     
-    public TestDevice(VideoConsumer consumer, int width, int height, int delay) {
-        super(consumer, width, height, delay, 100);
+    public TestDevice(VideoConsumer consumer, VideoDeviceDescription desc, 
+    		int width, int height, int delay) {
+        super(consumer, desc, width, height, delay, 100);
         
         generateTestCard();
         

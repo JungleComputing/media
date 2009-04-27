@@ -23,7 +23,7 @@ public class DirectShowDeviceFactory extends VideoDeviceFactory {
         
         VideoDeviceDescription d = devices[deviceNumber];
     
-        return new DirectShowDevice(consumer, d.deviceNumber, width, height, 
+        return new DirectShowDevice(consumer, d, width, height, 
                 delay, quality);
     }
 
@@ -54,7 +54,7 @@ public class DirectShowDeviceFactory extends VideoDeviceFactory {
             throw new Exception("Device " + description + " does not exist");
         }
         
-        return new DirectShowDevice(consumer, device.deviceNumber, width, 
+        return new DirectShowDevice(consumer, device, width, 
                 height, delay, quality);
     }
 }
