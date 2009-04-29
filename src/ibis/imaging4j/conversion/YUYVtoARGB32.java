@@ -27,9 +27,14 @@ public final class YUYVtoARGB32 extends Convertor {
             }
         }
         
-        LowLevelConvert.YUYVtoARGB32(in.getWidth(), in.getHeight(), 
-                in.getData(), out.getData());
+        long start = System.currentTimeMillis();
         
+        LowLevelConvert.YUYVtoARGB32Table(in.getWidth(), in.getHeight(), 
+                in.getData(), out.getData());
+     
+        long time = System.currentTimeMillis() - start;
+        
+        System.out.println("Conversion took " + time + " ms");
         return out;
     }
 }
