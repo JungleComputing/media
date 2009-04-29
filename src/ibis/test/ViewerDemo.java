@@ -27,11 +27,14 @@ public class ViewerDemo extends JPanel implements ActionListener {
     private final JComboBox deviceList;
     private final JComboBox formatList;
     
-    private final VideoStream videoStream;
+    private VideoStream videoStream;
     
-    private static int width = 352;
-    private static int height = 288;
+    private static int grabWidth = 352;
+    private static int grabHeight = 288;
     
+    private static int scaleWidth = -1;
+    private static int scaleHeight = -1;
+        
   //  private JLabel picture;
     
     public ViewerDemo() { 
@@ -71,7 +74,13 @@ public class ViewerDemo extends JPanel implements ActionListener {
         formatList.addActionListener(this);
                 
         // Create the video panel
-        videoStream = new VideoStream(width, height);
+        try {
+            videoStream = new VideoStream(grabWidth, grabHeight, scaleWidth, scaleHeight);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            System.exit(1);
+        }
         
         // Lay out the demo.
         
@@ -212,9 +221,14 @@ public class ViewerDemo extends JPanel implements ActionListener {
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
         
-        if (args.length == 2) { 
-            width = Integer.parseInt(args[0]);
-            height = Integer.parseInt(args[1]);
+        if (args.length >= 2) { 
+            grabWidth = Integer.parseInt(args[0]);
+            grabHeight = Integer.parseInt(args[1]);
+        }
+        
+        if (args.length == 4) { 
+            scaleWidth = Integer.parseInt(args[2]);
+            scaleHeight = Integer.parseInt(args[3]);
         }
         
         javax.swing.SwingUtilities.invokeLater(new Runnable() {

@@ -5,7 +5,9 @@ package ibis.test;
 
 import ibis.imaging4j.Conversion;
 import ibis.imaging4j.Format;
+import ibis.imaging4j.Scaling;
 import ibis.imaging4j.conversion.Convertor;
+import ibis.imaging4j.effects.Scaler;
 import ibis.video4j.VideoConsumer;
 import ibis.video4j.VideoDeviceFactory;
 import ibis.video4j.devices.VideoSource;
@@ -37,10 +39,16 @@ class VideoStream extends JPanel implements VideoConsumer {
     private int camWidth;
     private int camHeight;
 
+    private int scaleWidth;
+    private int scaleHeight;
+    
     private ibis.imaging4j.Image pixels;
-
+    private ibis.imaging4j.Image pixelsScaled;
+    
     private Convertor convertor;
 
+    private Scaler scaler;
+    
     private int [] pixelsAsInt;
 
     private Image offscreen;
@@ -54,20 +62,43 @@ class VideoStream extends JPanel implements VideoConsumer {
 
     private String message = "No webcam selected";
 
-    public VideoStream(int width, int height) { 
+    public VideoStream(int grabWidth, int grabHeight, int scaleWidth, 
+            int scaleHeight) throws Exception { 
         setBackground(Color.white);
 
-        this.camWidth = width;
-        this.camHeight = height;
+        this.camWidth = grabWidth;
+        this.camHeight = grabHeight;
 
-        byte [] data = new byte[width*height*4];
+        byte [] data = new byte[camWidth*camHeight*4];
 
-        pixels = new ibis.imaging4j.Image(Format.ARGB32, width, height, data);
+        pixels = new ibis.imaging4j.Image(Format.ARGB32, camWidth, camHeight, data);
 
-        pixelsAsInt = new int[width*height];
+        if (scaleWidth <= 0) { 
+            scaleWidth = grabWidth;
+        }
+        
+        if (scaleHeight <= 0) { 
+            scaleHeight = grabHeight;
+        }
+        
+        scaler = null;
+        
+        if (camWidth != scaleWidth || camHeight != scaleHeight) { 
+            scaler = Scaling.getScaler(Format.ARGB32);
 
-        source = new MemoryImageSource(width, height, 
-                pixelsAsInt, 0, width);
+            pixelsScaled = new ibis.imaging4j.Image(Format.ARGB32, scaleWidth,scaleHeight);
+            
+            if (scaler == null) { 
+                throw new Exception("Failed to find scaler for ARGB32");
+            }            
+        } else { 
+            pixelsScaled = pixels;
+        }
+
+        pixelsAsInt = new int[scaleWidth*scaleHeight];
+
+        source = new MemoryImageSource(scaleWidth, scaleHeight,  
+                pixelsAsInt, 0, scaleWidth);
 
         //source = new MemoryImageSource(width, height, ColorModel.getRGBdefault(), 
         //        data, 0, width);
@@ -85,7 +116,7 @@ class VideoStream extends JPanel implements VideoConsumer {
 
         // setFont(getFont().deriveFont(Font.ITALIC));
         setBorder(BorderFactory.createEmptyBorder(10,0,0,0));
-        setPreferredSize(new Dimension(width, height+10));
+        setPreferredSize(new Dimension(scaleWidth, scaleHeight+10));
     }
 
     public void selectDevice(int device, Format format) throws Exception {  
@@ -109,7 +140,7 @@ class VideoStream extends JPanel implements VideoConsumer {
                         + " to ARGB32");
             }            
         }
-    
+
         if (device >= 0) { 
             webcam = VideoDeviceFactory.openDevice(this, device, camWidth, 
                     camHeight, 0, format, 85);            
@@ -122,7 +153,7 @@ class VideoStream extends JPanel implements VideoConsumer {
             webcam = null;
             message = "No webcam selected";
         }
-
+        
         repaint();
     }
 
@@ -160,21 +191,37 @@ class VideoStream extends JPanel implements VideoConsumer {
             
             if (convertor == null) { 
                 // apparently we don't need to convert the image.
-                ibis.imaging4j.Image.copy(img, pixels);
+                
+                if (scaler == null) { 
+                    // ... and we don't need top scale it either!
+                    ibis.imaging4j.Image.copy(img, pixelsScaled);
+                } else { 
+                    // ... or we scale directly from the source
+                    scaler.scale(img, pixelsScaled);                    
+                }
+                
             } else { 
-                convertor.convert(img, pixels);
+                // We do need to convert...
+                
+                if (scaler == null) {
+                    // ... but we don't need to scale
+                    convertor.convert(img, pixelsScaled);
+                } else {
+                    // ... we need to convert and scale!
+                    convertor.convert(img, pixels);
+                    scaler.scale(pixels, pixelsScaled);
+                }
             }
-
+            
             // HACK: I do not understand how to get pixels onto the screen that are not 
             // in a RGB int [] format. When I try, nothing happens, so to untill I figure it out 
             // we create an extra copy here...
-
-            ByteBuffer b = pixels.getData();
+            
+            ByteBuffer b = pixelsScaled.getData();
             b.position(0);
             b.limit(b.capacity());
             
-            b.asIntBuffer().get(pixelsAsInt);
-            
+            b.asIntBuffer().get(pixelsAsInt);            
         
         } catch (Exception e) {
             e.printStackTrace();
