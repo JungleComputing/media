@@ -31,11 +31,11 @@ public class Format {
     public static final Format YUV422SP = new Format("YUV422SP", 16, "16 bit YUV422SP"); 
         
     // Several compressed formats
-    public static final Format JPG = new Format("JPG", 0, "JPG Compressed"); 
-    public static final Format MJPG = new Format("MJPG", 0, "Motion JPG Compressed");
-    public static final Format MPEG = new Format("MPEG", 0, "MPEG Compressed");
-    public static final Format TIFF = new Format("TIFF", 0, "TIFF Compressed");
-    public static final Format PNG = new Format("PNG", 0, "PNG Compressed");
+    public static final Format JPG = new Format("JPG", 0, "JPG Compressed", true); 
+    public static final Format MJPG = new Format("MJPG", 0, "Motion JPG Compressed", true);
+    public static final Format MPEG = new Format("MPEG", 0, "MPEG Compressed", true);
+    public static final Format TIFF = new Format("TIFF", 0, "TIFF Compressed", true);
+    public static final Format PNG = new Format("PNG", 0, "PNG Compressed", true);
     
     // RAW format. This allows you to directly access the byets produced 
     // by a camera. The exact format is unspecified  
