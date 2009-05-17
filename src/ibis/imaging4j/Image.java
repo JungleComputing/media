@@ -102,7 +102,7 @@ public class Image implements Serializable {
         return data;
     }
 
-    public long getSize() {
+    public int getSize() {
         return data.capacity();        
     }
     
