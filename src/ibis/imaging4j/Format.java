@@ -1,86 +1,88 @@
 package ibis.imaging4j;
 
-public class Format {
+import java.io.Serializable;
 
-    // This VideoPalette contains several formats which are regularly spotted 
-    // in the wild. 
+public enum Format implements Serializable {
+
+    GREY("GREY", 8, "Linear greyscale"),
     
     // Several straight forward RGB type formats
-    public static final Format GREY = new Format("GREY", 8, "Linear greyscale");
-    public static final Format RGB555 = new Format("RGB555", 15, "15 bit RGB");
-    public static final Format RGB565 = new Format("RGB565", 16, "16 bit RGB"); 
-    public static final Format RGB24 = new Format("RGB24", 24, "24 bit RGB");
-    public static final Format RGB48 = new Format("RGB48", 48, "48 bit RGB");
-    public static final Format ARGB32 = new Format("ARGB32", 32, "32 bit ARGB");  
-    public static final Format ARGB64 = new Format("ARGB64", 64, "64 bit ARGB");  
+    RGB555("RGB555", 15, "15 bit RGB"),
+    RGB565("RGB565", 16, "16 bit RGB"), 
+    RGB24("RGB24", 24, "24 bit RGB"),
+    RGB48("RGB48", 48, "48 bit RGB"),
+    ARGB32("ARGB32", 32, "32 bit ARGB"),  
+    ARGB64("ARGB64", 64, "64 bit ARGB"),  
         
     // Several Y/Cr/Cb based formats
-    public static final Format YUYV = new Format("YUYV", 16, "16 bit YUYV");
-    public static final Format UYVY = new Format("UYVY", 16, "16 bit UYVY"); 
+    YUYV("YUYV", 16, "16 bit YUYV"),
+    UYVY("UYVY", 16, "16 bit UYVY"), 
     
-    public static final Format YUV422 = new Format("YUV422", 16, "16 bit YUV422"); 
-    public static final Format YUV420 = new Format("YUV420", 12, "12 bit YUV420");
-    public static final Format YUV411 = new Format("YUV411", 12, "12 bit YUV411"); 
+    YUV422("YUV422", 16, "16 bit YUV422"), 
+    YUV420("YUV420", 12, "12 bit YUV420"),
+    YUV411("YUV411", 12, "12 bit YUV411"), 
     
-    public static final Format YUV422P = new Format("YUV422P", 16, "16 bit YUV422P");                 
-    public static final Format YUV411P = new Format("YUV411P", 12, "12 bit YUV411P"); 
-    public static final Format YUV420P = new Format("YUV420P", 12, "12 bit YUV420P"); 
-    public static final Format YUV410P = new Format("YUV410P", 10, "10 bit YUV410P"); 
+    YUV422P("YUV422P", 16, "16 bit YUV422P"),                 
+    YUV411P("YUV411P", 12, "12 bit YUV411P"), 
+    YUV420P("YUV420P", 12, "12 bit YUV420P"), 
+    YUV410P("YUV410P", 10, "10 bit YUV410P"), 
 
-    public static final Format YUV420SP = new Format("YUV420SP", 12, "12 bit YUV420SP"); 
-    public static final Format YUV422SP = new Format("YUV422SP", 16, "16 bit YUV422SP"); 
+    YUV420SP("YUV420SP", 12, "12 bit YUV420SP"), 
+    YUV422SP("YUV422SP", 16, "16 bit YUV422SP"), 
         
     // Several compressed formats
-    public static final Format JPG = new Format("JPG", 0, "JPG Compressed", true); 
-    public static final Format MJPG = new Format("MJPG", 0, "Motion JPG Compressed", true);
-    public static final Format MPEG = new Format("MPEG", 0, "MPEG Compressed", true);
-    public static final Format TIFF = new Format("TIFF", 0, "TIFF Compressed", true);
-    public static final Format PNG = new Format("PNG", 0, "PNG Compressed", true);
+    JPG("JPG", 0, "JPG Compressed", true), 
+    MJPG("MJPG", 0, "Motion JPG Compressed", true),
+    MPEG("MPEG", 0, "MPEG Compressed", true),
+    TIFF("TIFF", 0, "TIFF Compressed", true),
+    PNG("PNG", 0, "PNG Compressed", true),
     
-    // RAW format. This allows you to directly access the byets produced 
+    // RAW format. This allows you to directly access the bytes produced 
     // by a camera. The exact format is unspecified  
-    public static final Format RAW = new Format("RAW", 0, "RAW"); 
+    RAW("RAW", 0, "RAW"), 
 
     // NONE format. It is sometime convenient to throw away all image data 
     // except for the meta information. Use this format to indicate that the 
     // image doe not contain any real pixels. 
-    public static final Format NONE = new Format("NONE", 0, "NONE"); 
+    NONE("NONE", 0, "NONE");
     
-    public final int bpp;
-    public final String name;
-    public final String description;
-    public final boolean compressed; 
-    
-    protected Format(String name, int bpp, String description) {
+    private final int bpp;
+    private final String name;
+    private final String description;
+    private final boolean compressed;
+
+    Format(String name, int bpp, String description) {
         this(name, bpp, description, false);
-    } 
-    
-    protected Format(String name, int bpp, String description, 
-            boolean compressed) {
-        
-            this.name = name;
-            this.bpp = bpp;
-            this.description = description;
-            this.compressed = compressed;
     }
 
-    public String getName() { 
+    Format(String name, int bpp, String description, boolean compressed) {
+        this.name = name;
+        this.bpp = bpp;
+        this.description = description;
+        this.compressed = compressed;
+    }
+
+    public String getName() {
         return name;
     }
-    
-    public int getBitsPerPixel() { 
+
+    public int getBitsPerPixel() {
         return bpp;
     }
-    
-    public String getDescription() { 
+
+    public String getDescription() {
         return description;
     }
-    
-    public String toString() { 
+
+    public String toString() {
         return name;
-    }    
-    
+    }
+
     public long bytesRequired(int width, int height) {
-        return (long) Math.ceil((width * height * bpp) / 8.0); 
+        return (long) Math.ceil((width * height * bpp) / 8.0);
+    }
+
+    public boolean isCompressed() {
+        return compressed;
     }   
 }

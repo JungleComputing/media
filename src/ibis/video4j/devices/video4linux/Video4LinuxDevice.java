@@ -84,7 +84,7 @@ public class Video4LinuxDevice extends VideoSource {
         
         int compressionQuality = -1;
         
-        if (format.compressed) { 
+        if (format.isCompressed()) { 
             
             compressionQuality = (int) (65535 * (quality / 100.0));
             
@@ -310,7 +310,7 @@ public class Video4LinuxDevice extends VideoSource {
         
         int compressionQuality = -1;
         
-        if (currentFormat.compressed) { 
+        if (currentFormat.isCompressed()) { 
         
             if (quality < 0 || quality > 100) {
                 compressionQuality = (int) (65535 * (compressionQuality / 100.0));
