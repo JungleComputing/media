@@ -26,13 +26,31 @@ public class Image implements Serializable {
         this.height = -1;
         this.data = ByteBuffer.allocate(size);
     }
-
+    
     public Image(Format format, int width, int height) {
         this.format = format;
         this.width = width;
         this.height = height;
         this.data = ByteBuffer.allocate((int) format.bytesRequired(width,
                 height));
+    }
+
+    /**
+     * Copy constructor.
+     * @param original source of data for the new image
+     */
+    public Image(Image original) {
+        this.number = original.number;
+        //FIXME: copy?
+        this.metaData = original.metaData;
+        this.format = original.format;
+        this.width = original.width;
+        this.height = original.height;
+        this.data = ByteBuffer.allocate(original.data.capacity());
+
+        data.clear();
+        original.data.clear();
+        data.put(original.data);
     }
 
     public Image(Format format, int width, int height, byte[] data) {

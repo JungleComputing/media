@@ -2,14 +2,18 @@ package ibis.imaging4j;
 
 import ibis.imaging4j.Format;
 import ibis.imaging4j.conversion.ARGB32toBufferedImage;
+import ibis.imaging4j.conversion.ARGB32toRGB24;
+import ibis.imaging4j.conversion.ARGB64toBufferedImage;
 import ibis.imaging4j.conversion.Convertor;
 import ibis.imaging4j.conversion.ConvertorToBufferedImage;
 import ibis.imaging4j.conversion.MJPGtoARGB32;
 import ibis.imaging4j.conversion.MJPGtoJPG;
 import ibis.imaging4j.conversion.RGB24toARGB32;
 import ibis.imaging4j.conversion.RGB24toBufferedImage;
+import ibis.imaging4j.conversion.RGB48toBufferedImage;
 import ibis.imaging4j.conversion.YUV420SPtoBufferedImage;
 import ibis.imaging4j.conversion.YUV420SPtoRGB24;
+import ibis.imaging4j.conversion.YUV422SPtoARGB32;
 import ibis.imaging4j.conversion.YUV422SPtoBufferedImage;
 import ibis.imaging4j.conversion.YUV422SPtoRGB24;
 import ibis.imaging4j.conversion.YUYVtoARGB32;
@@ -56,24 +60,29 @@ public class Conversion {
         // TODO: should load these dynamically ? 
                 // TODO: this is far from complete!
 
-        try { 
+        try {
+            addConvertor(Format.ARGB32, new ARGB32toBufferedImage());
+            addConvertor(Format.ARGB32, Format.RGB24, new ARGB32toRGB24());
+            
+            addConvertor(Format.ARGB64, new ARGB64toBufferedImage());
+            
+            addConvertor(Format.MJPG, Format.ARGB32, new MJPGtoARGB32());
+            addConvertor(Format.MJPG, Format.JPG, new MJPGtoJPG());
+            
+            addConvertor(Format.RGB24, Format.ARGB32, new RGB24toARGB32());
+            addConvertor(Format.RGB24, new RGB24toBufferedImage());
+            addConvertor(Format.RGB48, new RGB48toBufferedImage());
+            
+            addConvertor(Format.YUV420SP, new YUV420SPtoBufferedImage());
+            addConvertor(Format.YUV420SP, Format.RGB24, new YUV420SPtoRGB24());
+
+            addConvertor(Format.YUV422SP, Format.ARGB32, new YUV422SPtoARGB32());
+            addConvertor(Format.YUV422SP, new YUV422SPtoBufferedImage());
+            addConvertor(Format.YUV422SP, Format.RGB24, new YUV422SPtoRGB24());
+
             addConvertor(Format.YUYV, Format.ARGB32, new YUYVtoARGB32());
             addConvertor(Format.YUYV, new YUYVtoBufferedImage());
 
-            addConvertor(Format.YUV420SP, Format.RGB24, new YUV420SPtoRGB24());
-            addConvertor(Format.YUV420SP, new YUV420SPtoBufferedImage());
-
-            addConvertor(Format.YUV422SP, Format.RGB24, new YUV422SPtoRGB24());
-            addConvertor(Format.YUV422SP, new YUV422SPtoBufferedImage());
-
-            addConvertor(Format.RGB24, Format.ARGB32, new RGB24toARGB32());
-            addConvertor(Format.RGB24, new RGB24toBufferedImage());
-
-            addConvertor(Format.ARGB32, new ARGB32toBufferedImage());
-
-            addConvertor(Format.MJPG, Format.JPG, new MJPGtoJPG());
-            addConvertor(Format.MJPG, Format.ARGB32, new MJPGtoARGB32());
-            
         } catch (Exception e) {
             System.err.println("Failed to load convertors!" + e);
             e.printStackTrace();
