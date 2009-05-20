@@ -130,9 +130,7 @@ public class JPEGImageDecompressor implements ImageDecompressor {
             
             if (stride == 3) {
                 
-                Image im = new Image(Format.RGB24, width, height);
-                im.getData().put(data);
-
+                Image im = new Image(Format.RGB24, width, height, data);
                 return im;
            // } else if (stride == 4) {
            //     byte [] result = new byte[width*height*3];

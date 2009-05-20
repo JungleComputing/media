@@ -12,19 +12,18 @@ public class ARGB32toBufferedImage implements ConvertorToBufferedImage {
         int width = in.getWidth();
         int height = in.getHeight();
         
-        BufferedImage b = new BufferedImage(width, height,   
+        BufferedImage result = new BufferedImage(width, height,   
                 BufferedImage.TYPE_INT_ARGB);
         
         ByteBuffer data = in.getData();
         
-        data.position(0);
-        data.limit(data.capacity());
+        data.clear();
             
         int [] tmp = new int[width*height];
 
-        data.asIntBuffer().put(tmp);
+        data.asIntBuffer().get(tmp);
             
-        b.setRGB(0, 0, width, height, tmp, 0, width);  
-        return b; 
+        result.setRGB(0, 0, width, height, tmp, 0, width);  
+        return result; 
     }
 }
