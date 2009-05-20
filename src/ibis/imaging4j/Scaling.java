@@ -2,6 +2,7 @@ package ibis.imaging4j;
 
 import ibis.imaging4j.Format;
 import ibis.imaging4j.effects.ARGB32Scaler;
+import ibis.imaging4j.effects.RGB24Scaler;
 import ibis.imaging4j.effects.Scaler;
 
 import java.util.HashMap;
@@ -17,6 +18,7 @@ public class Scaling {
 
         try { 
             addScaler(Format.ARGB32, new ARGB32Scaler());
+            addScaler(Format.RGB24, new RGB24Scaler());
         } catch (Exception e) {
             System.err.println("Failed to load convertors!" + e);
             e.printStackTrace();
