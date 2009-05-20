@@ -39,7 +39,7 @@ public class Image implements Serializable {
      * Copy constructor.
      * @param original source of data for the new image
      */
-    public Image(Image original) {
+    private Image(Image original) {
         this.number = original.number;
         //FIXME: copy?
         this.metaData = original.metaData;
@@ -130,7 +130,12 @@ public class Image implements Serializable {
         return data.capacity();
     }
 
-    public static void copy(Image src, Image dst) throws Exception {
+    public static Image copy(Image src, Image dst) throws Exception {
+        if (dst == null) {
+            dst = new Image(src);
+            return dst;
+        }
+        
         // TODO: is this correct for compressed images ?
         if (dst.format != src.format) {
             throw new Exception("Incompatible format: " + dst.format + " not equal to " + src.format);
@@ -149,6 +154,8 @@ public class Image implements Serializable {
         d.limit(d.capacity());
 
         d.put(s);
+        
+        return dst;
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
