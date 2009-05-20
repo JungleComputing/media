@@ -8,6 +8,7 @@ import ibis.imaging4j.conversion.Convertor;
 import ibis.imaging4j.conversion.ConvertorToBufferedImage;
 import ibis.imaging4j.conversion.MJPGtoARGB32;
 import ibis.imaging4j.conversion.MJPGtoJPG;
+import ibis.imaging4j.conversion.MJPGtoRGB24;
 import ibis.imaging4j.conversion.RGB24toARGB32;
 import ibis.imaging4j.conversion.RGB24toBufferedImage;
 import ibis.imaging4j.conversion.RGB48toBufferedImage;
@@ -18,6 +19,7 @@ import ibis.imaging4j.conversion.YUV422SPtoBufferedImage;
 import ibis.imaging4j.conversion.YUV422SPtoRGB24;
 import ibis.imaging4j.conversion.YUYVtoARGB32;
 import ibis.imaging4j.conversion.YUYVtoBufferedImage;
+import ibis.imaging4j.conversion.YUYVtoRGB24;
 
 import java.util.HashMap;
 
@@ -68,9 +70,11 @@ public class Conversion {
             
             addConvertor(Format.MJPG, Format.ARGB32, new MJPGtoARGB32());
             addConvertor(Format.MJPG, Format.JPG, new MJPGtoJPG());
+            addConvertor(Format.MJPG, Format.RGB24, new MJPGtoRGB24());
             
             addConvertor(Format.RGB24, Format.ARGB32, new RGB24toARGB32());
             addConvertor(Format.RGB24, new RGB24toBufferedImage());
+            
             addConvertor(Format.RGB48, new RGB48toBufferedImage());
             
             addConvertor(Format.YUV420SP, new YUV420SPtoBufferedImage());
@@ -82,7 +86,7 @@ public class Conversion {
 
             addConvertor(Format.YUYV, Format.ARGB32, new YUYVtoARGB32());
             addConvertor(Format.YUYV, new YUYVtoBufferedImage());
-
+            addConvertor(Format.YUYV, Format.RGB24, new YUYVtoRGB24());
         } catch (Exception e) {
             System.err.println("Failed to load convertors!" + e);
             e.printStackTrace();
