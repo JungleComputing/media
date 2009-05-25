@@ -84,12 +84,15 @@ public class ConversionTest {
             Image testImage = testImage();
             viewer.setImage(testImage, "test image");
             Thread.sleep(5000);
-
-            Image rgb24image = Imaging4j.convert(testImage, Format.RGB24);
             
-            viewer.setImage(rgb24image, "RGB24 image");
+            IO.save(Imaging4j.convert(testImage, Format.JPG), new File("testImage.jpg"));
+
+            Image rgb24Image = Imaging4j.convert(testImage, Format.RGB24);
+            
+            viewer.setImage(rgb24Image, "RGB24 image");
             Thread.sleep(5000);
 
+            IO.save(Imaging4j.convert(rgb24Image, Format.JPG), new File("converted.jpg"));
 
             viewer.setImage(whiteImage(), "white image");
             Thread.sleep(5000);

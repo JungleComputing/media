@@ -1,8 +1,9 @@
 package ibis.imaging4j.conversion;
 
+import java.nio.ByteBuffer;
+
 import ibis.imaging4j.Format;
 import ibis.imaging4j.Image;
-import ibis.imaging4j.conversion.util.LowLevelConvert;
 
 public class RGB24toARGB32 extends Convertor {
 
@@ -14,18 +15,43 @@ public class RGB24toARGB32 extends Convertor {
 
     @Override
     public Image convert(Image in, Image out) throws ConversionException {
-       
+
+        if (in.getFormat() != Format.RGB24) {
+            throw new ConversionException("input image not in RGB24 format");
+        }
+
         if (out == null) {
             out = new Image(Format.ARGB32, in.getWidth(), in.getHeight());
-        } else { 
-            if (out.getWidth() != in.getWidth() || 
-                    out.getHeight() != in.getHeight()) { 
-                throw new ConversionException("Target image has wrong dimensions!");
-            }
         }
-    
-        LowLevelConvert.RGB24toARGB32(in.getData(), out.getData());
+
+        if (out.getFormat() != Format.ARGB32) {
+            throw new ConversionException("output image not in ARGB32 format");
+        }
+
+        if (out.getWidth() != in.getWidth()
+                || out.getHeight() != in.getHeight()) {
+            throw new ConversionException("Target image has wrong dimensions!");
+        }
+
+        ByteBuffer dataIn = in.getData().duplicate();
+        ByteBuffer dataOut = out.getData().duplicate();
+
+        dataIn.clear();
+        dataOut.clear();
+
+        byte[] argb = new byte[4];
         
+        //set a to max (opaque)
+        argb[0] = (byte) 0xFF;
+        while (dataIn.hasRemaining()) {
+            //get rgb value (skip first "a" element)
+            dataIn.get(argb, 1, 3);
+
+            //put argb
+            dataOut.put(argb);
+        }
+
         return out;
+
     }
 }
