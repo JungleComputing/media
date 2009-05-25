@@ -1,9 +1,6 @@
-package ibis.imaging4j;
+package ibis.imaging4j.scaling;
 
 import ibis.imaging4j.Format;
-import ibis.imaging4j.effects.ARGB32Scaler;
-import ibis.imaging4j.effects.RGB24Scaler;
-import ibis.imaging4j.effects.Scaler;
 
 import java.util.HashMap;
 

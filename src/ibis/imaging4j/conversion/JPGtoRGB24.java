@@ -1,6 +1,5 @@
 package ibis.imaging4j.conversion;
 
-import ibis.imaging4j.Conversion;
 import ibis.imaging4j.Format;
 import ibis.imaging4j.Image;
 import ibis.imaging4j.decompression.JPEGImageDecompressor;

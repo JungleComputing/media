@@ -1,4 +1,4 @@
-package ibis.imaging4j.effects;
+package ibis.imaging4j.scaling;
 
 import ibis.imaging4j.Image;
 

@@ -9,7 +9,6 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 
-import ibis.imaging4j.Conversion;
 import ibis.imaging4j.Format;
 import ibis.imaging4j.Image;
 

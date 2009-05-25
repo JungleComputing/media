@@ -2,7 +2,6 @@ package ibis.imaging4j.decompression;
 
 import ibis.imaging4j.Format;
 import ibis.imaging4j.Image;
-import ibis.imaging4j.ImageDecompressor;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;

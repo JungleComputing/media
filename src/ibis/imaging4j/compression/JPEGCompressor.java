@@ -1,9 +1,8 @@
 package ibis.imaging4j.compression;
 
-import ibis.imaging4j.Conversion;
 import ibis.imaging4j.Format;
 import ibis.imaging4j.Image;
-import ibis.imaging4j.ImageCompressor;
+import ibis.imaging4j.conversion.Conversion;
 import ibis.imaging4j.conversion.ConvertorToBufferedImage;
 
 import java.awt.image.BufferedImage;

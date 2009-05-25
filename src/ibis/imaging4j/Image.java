@@ -4,21 +4,21 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 
-public class Image implements Serializable {
+public final class Image implements Serializable {
 
     private static final long serialVersionUID = -6781258283276066646L;
 
-    protected long number;
+    private long number;
 
-    protected Object metaData;
+    private Object metaData;
 
-    protected final Format format;
+    private final Format format;
 
-    protected transient ByteBuffer data;
+    private transient ByteBuffer data;
 
-    protected final int width;
+    private final int width;
 
-    protected final int height;
+    private final int height;
 
     public Image(Format format, int size) {
         this.format = format;

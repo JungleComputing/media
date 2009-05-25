@@ -7,8 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ibis.imaging4j.Format;
-import ibis.imaging4j.IO;
 import ibis.imaging4j.Image;
+import ibis.imaging4j.Imaging4j;
+import ibis.imaging4j.conversion.Conversion;
+import ibis.imaging4j.io.IO;
 
 public class ConversionTest {
 
@@ -82,10 +84,12 @@ public class ConversionTest {
             Image testImage = testImage();
             viewer.setImage(testImage, "test image");
             Thread.sleep(5000);
+
+            Image rgb24image = Imaging4j.convert(testImage, Format.RGB24);
             
-//            Convertor convertor = 
-//            
-//            Image rgb24 = 
+            viewer.setImage(rgb24image, "RGB24 image");
+            Thread.sleep(5000);
+
 
             viewer.setImage(whiteImage(), "white image");
             Thread.sleep(5000);

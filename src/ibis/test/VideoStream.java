@@ -3,11 +3,11 @@
  */
 package ibis.test;
 
-import ibis.imaging4j.Conversion;
 import ibis.imaging4j.Format;
-import ibis.imaging4j.Scaling;
+import ibis.imaging4j.conversion.Conversion;
 import ibis.imaging4j.conversion.Convertor;
-import ibis.imaging4j.effects.Scaler;
+import ibis.imaging4j.scaling.Scaler;
+import ibis.imaging4j.scaling.Scaling;
 import ibis.video4j.VideoConsumer;
 import ibis.video4j.VideoDeviceFactory;
 import ibis.video4j.devices.VideoSource;

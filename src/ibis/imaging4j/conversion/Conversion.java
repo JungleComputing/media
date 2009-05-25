@@ -1,30 +1,6 @@
-package ibis.imaging4j;
+package ibis.imaging4j.conversion;
 
 import ibis.imaging4j.Format;
-import ibis.imaging4j.conversion.ARGB32toBufferedImage;
-import ibis.imaging4j.conversion.ARGB32toJPG;
-import ibis.imaging4j.conversion.ARGB32toRGB24;
-import ibis.imaging4j.conversion.ARGB64toBufferedImage;
-import ibis.imaging4j.conversion.Convertor;
-import ibis.imaging4j.conversion.ConvertorToBufferedImage;
-import ibis.imaging4j.conversion.GREYtoARGB32;
-import ibis.imaging4j.conversion.JPGtoARGB32;
-import ibis.imaging4j.conversion.JPGtoRGB24;
-import ibis.imaging4j.conversion.MJPGtoARGB32;
-import ibis.imaging4j.conversion.MJPGtoJPG;
-import ibis.imaging4j.conversion.MJPGtoRGB24;
-import ibis.imaging4j.conversion.RGB24toARGB32;
-import ibis.imaging4j.conversion.RGB24toBufferedImage;
-import ibis.imaging4j.conversion.RGB24toJPG;
-import ibis.imaging4j.conversion.RGB48toBufferedImage;
-import ibis.imaging4j.conversion.YUV420SPtoBufferedImage;
-import ibis.imaging4j.conversion.YUV420SPtoRGB24;
-import ibis.imaging4j.conversion.YUV422SPtoARGB32;
-import ibis.imaging4j.conversion.YUV422SPtoBufferedImage;
-import ibis.imaging4j.conversion.YUV422SPtoRGB24;
-import ibis.imaging4j.conversion.YUYVtoARGB32;
-import ibis.imaging4j.conversion.YUYVtoBufferedImage;
-import ibis.imaging4j.conversion.YUYVtoRGB24;
 
 import java.util.HashMap;
 

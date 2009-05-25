@@ -1,7 +1,6 @@
 package ibis.imaging4j.decompression;
 
 import ibis.imaging4j.Format;
-import ibis.imaging4j.ImageDecompressor;
 
 import java.util.HashMap;
 

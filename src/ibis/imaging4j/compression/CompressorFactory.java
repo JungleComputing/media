@@ -1,7 +1,6 @@
 package ibis.imaging4j.compression;
 
 import ibis.imaging4j.Format;
-import ibis.imaging4j.ImageCompressor;
 
 import java.util.HashMap;
 

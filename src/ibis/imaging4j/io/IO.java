@@ -1,4 +1,7 @@
-package ibis.imaging4j;
+package ibis.imaging4j.io;
+
+import ibis.imaging4j.Format;
+import ibis.imaging4j.Image;
 
 import java.io.DataInputStream;
 import java.io.File;

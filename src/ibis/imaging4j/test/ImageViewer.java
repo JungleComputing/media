@@ -1,11 +1,12 @@
 package ibis.imaging4j.test;
 
-import ibis.imaging4j.Conversion;
 import ibis.imaging4j.Format;
 import ibis.imaging4j.Image;
-import ibis.imaging4j.Scaling;
+import ibis.imaging4j.Imaging4j;
+import ibis.imaging4j.conversion.Conversion;
 import ibis.imaging4j.conversion.Convertor;
-import ibis.imaging4j.effects.Scaler;
+import ibis.imaging4j.scaling.Scaler;
+import ibis.imaging4j.scaling.Scaling;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -84,13 +85,7 @@ public class ImageViewer extends JPanel {
             converted = image;
             logger.info("not converted");
         } else {
-            Convertor convertor = Conversion.getConvertor(image.getFormat(), Format.ARGB32);
-            
-            if (convertor == null) {
-                throw new Exception("cannot convert from " + image.getFormat() + " to " + Format.ARGB32);
-            }
-            
-            converted = convertor.convert(image, null);
+            converted = Imaging4j.convert(image, Format.ARGB32);
             logger.info("converted from " + image.getFormat() + " to " + Format.ARGB32);
         }
         
@@ -98,13 +93,7 @@ public class ImageViewer extends JPanel {
             scaled = converted;
             logger.info("not scaled");
         } else {
-            Scaler scaler = Scaling.getScaler(Format.ARGB32);
-            
-            if (scaler == null) {
-                throw new Exception("cannot scale " + Format.ARGB32);
-            }
-
-            scaled = scaler.scale(converted, width, height);
+            scaled = Imaging4j.scale(converted, width, height);
             logger.info("scaled from " + converted.getWidth() + "x" + converted.getHeight() + " to " + width + "x" + height);
         }
         
