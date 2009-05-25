@@ -1,7 +1,6 @@
 package ibis.imaging4j.effects;
 
 import ibis.imaging4j.Image;
-import ibis.imaging4j.conversion.ConversionException;
 
 public abstract class Scaler {
  

@@ -21,6 +21,14 @@ public class RGB24Scaler extends Scaler {
         if (out == null) { 
             throw new NullPointerException("Destionation image is null!");
         }
+        
+        if (in.getFormat() != Format.RGB24) {
+            throw new Exception("source image is invalid format: " + in.getFormat());
+        }
+        
+        if (out.getFormat() != Format.RGB24) {
+            throw new Exception("target image is invalid format: " + out.getFormat());
+        }
     
         final int width = in.getWidth();
         final int height = in.getHeight();

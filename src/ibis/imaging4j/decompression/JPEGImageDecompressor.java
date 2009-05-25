@@ -129,14 +129,14 @@ public class JPEGImageDecompressor implements ImageDecompressor {
             byte [] data = ((DataBufferByte) buf).getData();
             
             if (stride == 3) {
-                
-                Image im = new Image(Format.RGB24, width, height, data);
-                return im;
+                return new Image(Format.RGB24, width, height, data);
            // } else if (stride == 4) {
            //     byte [] result = new byte[width*height*3];
            //     RGB32toRGB24(data, result);
+            } else if (stride == 1) {
+                return new Image(Format.GREY, width, height, data);
             } else { 
-                throw new RuntimeException("Unsupported image buffer type!");
+                throw new RuntimeException("Unsupported image buffer stride: " + stride);
             }
          
         } else if (type == DataBuffer.TYPE_INT) { 

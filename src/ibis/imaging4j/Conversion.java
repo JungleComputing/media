@@ -7,6 +7,8 @@ import ibis.imaging4j.conversion.ARGB32toRGB24;
 import ibis.imaging4j.conversion.ARGB64toBufferedImage;
 import ibis.imaging4j.conversion.Convertor;
 import ibis.imaging4j.conversion.ConvertorToBufferedImage;
+import ibis.imaging4j.conversion.GREYtoARGB32;
+import ibis.imaging4j.conversion.JPGtoARGB32;
 import ibis.imaging4j.conversion.JPGtoRGB24;
 import ibis.imaging4j.conversion.MJPGtoARGB32;
 import ibis.imaging4j.conversion.MJPGtoJPG;
@@ -72,6 +74,9 @@ public class Conversion {
             
             addConvertor(Format.ARGB64, new ARGB64toBufferedImage());
             
+            addConvertor(Format.GREY, Format.ARGB32, new GREYtoARGB32());
+
+            addConvertor(Format.JPG, Format.ARGB32, new JPGtoARGB32());
             addConvertor(Format.JPG, Format.RGB24, new JPGtoRGB24());
             
             addConvertor(Format.MJPG, Format.ARGB32, new MJPGtoARGB32());

@@ -11,7 +11,14 @@
     <property name="builddir" value="./build"/>
     <property name="distdir" value="./jars"/>
     <property name="includes" value="./build-includes"/>
-    <property name="external" value=""/>
+    <property name="external" value="external"/>
+
+    <path id="external.jars">
+	<fileset dir="external">
+	    <include name="*.jar" />
+	</fileset>
+    </path>
+
 
     <property file="${includes}/${os.name}-${os.arch}.properties" />
 
@@ -24,7 +31,7 @@
 
     <target name="compile" depends="prepare">
 	
-	<javac 	classpath="${external}"
+	<javac 	classpathref="external.jars"
 		destdir="${builddir}"
                 srcdir="${srcdir}"
                 debug="true"
