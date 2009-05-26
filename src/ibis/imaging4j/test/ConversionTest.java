@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import ibis.imaging4j.Format;
 import ibis.imaging4j.Image;
 import ibis.imaging4j.Imaging4j;
-import ibis.imaging4j.conversion.Conversion;
 import ibis.imaging4j.io.IO;
 
 public class ConversionTest {
@@ -17,8 +16,8 @@ public class ConversionTest {
     private static final Logger logger = LoggerFactory
             .getLogger(ConversionTest.class);
 
-    public static final int WIDTH = 1024;
-    public static final int HEIGHT = 768;
+    public static final int WIDTH = 800;
+    public static final int HEIGHT = 600;
 
     private static void drawBlock(ByteBuffer buffer, double from, double to,
             byte a, byte r, byte g, byte b) {
@@ -55,7 +54,7 @@ public class ConversionTest {
 
         return image;
     }
-
+    
     private static Image whiteImage() {
         Image image = new Image(Format.ARGB32, WIDTH, HEIGHT);
         ByteBuffer data = image.getData();
@@ -82,17 +81,33 @@ public class ConversionTest {
             }
 
             Image testImage = testImage();
-            viewer.setImage(testImage, "test image");
+            
+            viewer.setImage(testImage, "buffered image");
             Thread.sleep(5000);
             
-            IO.save(Imaging4j.convert(testImage, Format.JPG), new File("testImage.jpg"));
-
-            Image rgb24Image = Imaging4j.convert(testImage, Format.RGB24);
-            
-            viewer.setImage(rgb24Image, "RGB24 image");
+            Image rgb24 = Imaging4j.convert(testImage, Format.RGB24);
+            viewer.setImage(rgb24, "RGB24 image");
             Thread.sleep(5000);
+            
+            Image argb32 = Imaging4j.convert(rgb24, Format.ARGB32);
+            viewer.setImage(argb32, "TestImage(ARGB32)->RGB24->ARGB32 image");
+            Thread.sleep(5000);
+            
+            Image jpg = Imaging4j.convert(argb32, Format.JPG);
+            
+            IO.save(jpg, new File("image.jpg"));
+            
+            viewer.setImage(jpg, "JPG image");
+            Thread.sleep(5000);
+//            viewer.setImage(Imaging4j.convert(testImage, Format.RGB24), "RGB24 image");
+//            Thread.sleep(5000);
 
-            IO.save(Imaging4j.convert(rgb24Image, Format.JPG), new File("converted.jpg"));
+
+
+//            IO.save(Imaging4j.convert(testImage, Format.JPG), new File("testImage.jpg"));
+//
+//
+//            IO.save(Imaging4j.convert(rgb24Image, Format.JPG), new File("converted.jpg"));
 
             viewer.setImage(whiteImage(), "white image");
             Thread.sleep(5000);

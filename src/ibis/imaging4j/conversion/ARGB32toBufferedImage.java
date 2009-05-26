@@ -15,7 +15,7 @@ public class ARGB32toBufferedImage implements ConvertorToBufferedImage {
         BufferedImage result = new BufferedImage(width, height,   
                 BufferedImage.TYPE_INT_ARGB);
         
-        ByteBuffer data = in.getData();
+        ByteBuffer data = in.getData().duplicate();
         
         data.clear();
             

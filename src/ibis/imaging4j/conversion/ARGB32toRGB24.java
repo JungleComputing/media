@@ -43,7 +43,7 @@ public class ARGB32toRGB24 extends Convertor {
         while (dataIn.hasRemaining()) {
             //get argb value
             dataIn.get(argb);
-
+            
             //put rgb (skip a)
             dataOut.put(argb, 1, 3);
         }

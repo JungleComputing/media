@@ -44,7 +44,7 @@ public class RGB24toARGB32 extends Convertor {
         //set a to max (opaque)
         argb[0] = (byte) 0xFF;
         while (dataIn.hasRemaining()) {
-            //get rgb value (skip first "a" element)
+            //get rgb value (skip first "a" element in array)
             dataIn.get(argb, 1, 3);
 
             //put argb

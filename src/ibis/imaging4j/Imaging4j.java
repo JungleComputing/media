@@ -37,7 +37,8 @@ public final class Imaging4j {
         scaler.scale(in, out);
     }
 
-    public static Image scale(Image in, int targetWidth, int targetHeight) throws Exception {
+    public static Image scale(Image in, int targetWidth, int targetHeight)
+            throws Exception {
         Scaler scaler = Scaling.getScaler(in.getFormat());
         if (scaler == null) {
             throw new UnsupportedFormatException("Cannot scale "
@@ -57,7 +58,8 @@ public final class Imaging4j {
     }
 
     public static Image convert(Image in, Format targetFormat) throws Exception {
-        Convertor convertor = Conversion.getConvertor(in.getFormat(), targetFormat);
+        Convertor convertor = Conversion.getConvertor(in.getFormat(),
+                targetFormat);
         if (convertor == null) {
             throw new UnsupportedFormatException("Cannot convert from "
                     + in.getFormat() + " to " + targetFormat);
@@ -65,15 +67,33 @@ public final class Imaging4j {
         return convertor.convert(in, null);
     }
 
+    /**
+     * Convert to a buffered image by first converting to ARGB32, then to a
+     * buffered image.
+     * 
+     * @param in
+     *            source image
+     * @return a BufferedImage
+     * @throws Exception
+     *             in case conversion fails
+     */
     public static BufferedImage convertToBufferedImage(Image in)
             throws Exception {
+
+        Image argb32Image;
+        if (in.getFormat() == Format.ARGB32) {
+            argb32Image = in;
+        } else {
+            argb32Image = convert(in, Format.ARGB32);
+        }
+
         ConvertorToBufferedImage convertor = Conversion
-                .getConvertorToBufferedImage(in.getFormat());
+                .getConvertorToBufferedImage(Format.ARGB32);
         if (convertor == null) {
             throw new UnsupportedFormatException("Cannot convert from "
-                    + in.getFormat() + " to BufferedImage");
+                    + Format.ARGB32 + " to BufferedImage");
         }
-        return convertor.convert(in);
+        return convertor.convert(argb32Image);
     }
 
 }

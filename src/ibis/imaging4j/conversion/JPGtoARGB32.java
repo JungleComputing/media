@@ -54,7 +54,7 @@ public class JPGtoARGB32 extends Convertor {
             return out;
 
         } catch (Exception e) {
-            throw new ConversionException("Failed to convert to JPG", e);
+            throw new ConversionException("Failed to convert from JPG to ARGB32", e);
         }
     }
 }

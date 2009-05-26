@@ -1,7 +1,6 @@
 package ibis.imaging4j.conversion;
 
 import ibis.imaging4j.Image;
-import ibis.imaging4j.conversion.util.LowLevelConvert;
 
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
@@ -23,9 +22,25 @@ public class RGB24toBufferedImage implements ConvertorToBufferedImage {
             
         int [] tmp = new int[width*height];
 
-        LowLevelConvert.RGB24toARGB32(in.getWidth(), in.getHeight(), data, tmp);
+        RGB24toARGB32(in.getWidth(), in.getHeight(), data, tmp);
 
         b.setRGB(0, 0, width, height, tmp, 0, width);  
         return b; 
+    }
+    
+    public static final void RGB24toARGB32(int width, int height, ByteBuffer in, int [] rgbOut) { 
+
+        final int size = width * height * 3;
+
+        int index = 0;
+
+        for (int i=0;i<size;i+=3) { 
+
+            final int r = (0xff & in.get(i));
+            final int g = (0xff & in.get(i+1));
+            final int b = (0xff & in.get(i+2));
+
+            rgbOut[index++] = 0xFF000000 | r << 16 | g << 8 | b;
+        }
     }
 }

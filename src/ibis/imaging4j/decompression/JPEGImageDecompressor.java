@@ -8,6 +8,7 @@ import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.PixelInterleavedSampleModel;
 import java.awt.image.Raster;
+import java.awt.image.SampleModel;
 import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
@@ -18,7 +19,13 @@ import javax.imageio.ImageReader;
 import javax.imageio.plugins.jpeg.JPEGImageReadParam;
 import javax.imageio.stream.ImageInputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class JPEGImageDecompressor implements ImageDecompressor {
+    
+    private static final Logger logger = LoggerFactory
+            .getLogger(JPEGImageDecompressor.class);
     
     // private final Logger logger = Logger.getLogger("Decompressor.JPG");
     
@@ -86,8 +93,8 @@ public class JPEGImageDecompressor implements ImageDecompressor {
         final int height = r.getHeight();
         final int width = r.getWidth();
         
-        PixelInterleavedSampleModel sm = 
-            (PixelInterleavedSampleModel) r.getSampleModel();
+        SampleModel sm = 
+             r.getSampleModel();
         
         DataBuffer buf = r.getDataBuffer();
         
@@ -123,8 +130,8 @@ public class JPEGImageDecompressor implements ImageDecompressor {
         
         if (type == DataBuffer.TYPE_BYTE) { 
             
-            int stride = sm.getPixelStride();
-
+            int stride = r.getNumDataElements();
+            
             byte [] data = ((DataBufferByte) buf).getData();
             
             if (stride == 3) {
