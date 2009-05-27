@@ -20,7 +20,7 @@ import java.io.IOException;
  */
 public final class Imaging4j {
 
-    public static void save(Image image, File file) throws IOException {
+    public static void save(Image image, File file) throws Exception {
         IO.save(image, file);
     }
 

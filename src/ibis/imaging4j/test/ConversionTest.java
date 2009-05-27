@@ -16,8 +16,8 @@ public class ConversionTest {
     private static final Logger logger = LoggerFactory
             .getLogger(ConversionTest.class);
 
-    public static final int WIDTH = 800;
-    public static final int HEIGHT = 600;
+    public static final int WIDTH = 1024;
+    public static final int HEIGHT = 768;
 
     private static void drawBlock(ByteBuffer buffer, double from, double to,
             byte a, byte r, byte g, byte b) {
@@ -93,21 +93,7 @@ public class ConversionTest {
             viewer.setImage(argb32, "TestImage(ARGB32)->RGB24->ARGB32 image");
             Thread.sleep(5000);
             
-            Image jpg = Imaging4j.convert(argb32, Format.JPG);
-            
-            IO.save(jpg, new File("image.jpg"));
-            
-            viewer.setImage(jpg, "JPG image");
-            Thread.sleep(5000);
-//            viewer.setImage(Imaging4j.convert(testImage, Format.RGB24), "RGB24 image");
-//            Thread.sleep(5000);
-
-
-
-//            IO.save(Imaging4j.convert(testImage, Format.JPG), new File("testImage.jpg"));
-//
-//
-//            IO.save(Imaging4j.convert(rgb24Image, Format.JPG), new File("converted.jpg"));
+            IO.save(rgb24, new File("image.rgb"));
 
             viewer.setImage(whiteImage(), "white image");
             Thread.sleep(5000);
