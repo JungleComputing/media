@@ -4,22 +4,12 @@ import ibis.imaging4j.Image;
 import ibis.video4j.VideoConsumer;
 import ibis.video4j.VideoDeviceFactory;
 import ibis.video4j.devices.VideoSource;
-import ibis.video4j.utils.ImageUtils;
 
 public class Convert implements VideoConsumer {
 
     private VideoSource webcam;
 
-    private int [] buffer;
-    
-    private int w;
-    private int h;
-    
     public Convert(int w, int h, int device) throws Exception { 
-        
-        this.w = w;
-        this.h = h;
-
         webcam = VideoDeviceFactory.openDevice(this, device, w, h, 0);            
         webcam.start();
     }
@@ -28,12 +18,12 @@ public class Convert implements VideoConsumer {
 
         try {
             
-            long start = System.currentTimeMillis();
-            
-            // FIX FIX FIX!
-          //  byte [] out = ImageUtils.encode(buffer, w, h, 85);
-            
-            long end = System.currentTimeMillis();
+//            long start = System.currentTimeMillis();
+//            
+//            // FIX FIX FIX!
+//          //  byte [] out = ImageUtils.encode(buffer, w, h, 85);
+//            
+//            long end = System.currentTimeMillis();
             
             //System.out.println("Image enode took " + (end-start) + " ms. " 
             //        + "Compressed from " + (buffer.length*4) + " to " 

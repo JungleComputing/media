@@ -1,9 +1,6 @@
 
 package ibis.video4j.devices.video4linux;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import ibis.imaging4j.Image;
 import ibis.imaging4j.Format;
 import ibis.video4j.VideoConsumer;

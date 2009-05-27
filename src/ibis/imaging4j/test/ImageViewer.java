@@ -1,36 +1,17 @@
 package ibis.imaging4j.test;
 
-import ibis.imaging4j.Format;
 import ibis.imaging4j.Image;
 import ibis.imaging4j.Imaging4j;
-import ibis.imaging4j.conversion.Conversion;
-import ibis.imaging4j.conversion.Convertor;
-import ibis.imaging4j.scaling.Scaler;
-import ibis.imaging4j.scaling.Scaling;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.awt.image.MemoryImageSource;
-import java.nio.ByteBuffer;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class ImageViewer extends JPanel {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(ImageViewer.class);
-
     private static final long serialVersionUID = 1L;
-
-    private final int width;
-    private final int height;
 
     private final JFrame frame;
 
@@ -39,9 +20,6 @@ public class ImageViewer extends JPanel {
     private String text;
 
     public ImageViewer(int width, int height) {
-        this.width = width;
-        this.height = height;
-
         text = "unset";
         image = null;
 

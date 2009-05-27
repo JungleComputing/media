@@ -2,7 +2,6 @@ package ibis.video4j.devices.directshow;
 
 import java.util.ArrayList;
 
-import ibis.imaging4j.Format;
 import ibis.video4j.VideoDeviceDescription;
 import ibis.video4j.VideoDeviceDiscovery;
 

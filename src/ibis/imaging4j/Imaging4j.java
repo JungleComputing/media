@@ -9,7 +9,6 @@ import ibis.imaging4j.scaling.Scaling;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 
 /**
  * Main entrypoint of Imaging4j.

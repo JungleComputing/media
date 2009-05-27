@@ -41,7 +41,7 @@ public class RGB24toJPG extends Convertor {
             ImageOutputStream output;
             output = ImageIO.createImageOutputStream(bytes);
 
-            Iterator writers = ImageIO.getImageWritersByFormatName("jpg");
+            Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg");
 
             if (writers == null || !writers.hasNext()) {
                 throw new RuntimeException("No writers!");
