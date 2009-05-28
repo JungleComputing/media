@@ -2,10 +2,15 @@ package ibis.imaging4j.test;
 
 import ibis.imaging4j.Image;
 import ibis.imaging4j.Imaging4j;
+import ibis.imaging4j.io.IO;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -63,5 +68,17 @@ public class ImageViewer extends JPanel {
         g.setColor(Color.PINK);
         g.drawString(text, 20, 20);
     }
+    
+    public static void main(String[] arguments) throws Exception {
+
+        ImageViewer viewer = new ImageViewer(1024, 768);
+
+            for (String argument : arguments) {
+                Image loadedImage = Imaging4j.load(new File(argument));
+                viewer.setImage(loadedImage, argument);
+                Thread.sleep(5000);
+            }
+            
+        }
 
 }
