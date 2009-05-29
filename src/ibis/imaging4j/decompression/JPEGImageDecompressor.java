@@ -133,8 +133,9 @@ public class JPEGImageDecompressor implements ImageDecompressor {
             
             byte [] data = ((DataBufferByte) buf).getData();
             
+            //FIXME: the JPEGDecoder should figure out the subpixel format here, not assume BGR or RGB
             if (stride == 3) {
-                return new Image(Format.RGB24, width, height, data);
+                return new Image(Format.BGR24, width, height, data);
            // } else if (stride == 4) {
            //     byte [] result = new byte[width*height*3];
            //     RGB32toRGB24(data, result);

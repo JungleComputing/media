@@ -12,7 +12,9 @@ public enum Format implements Serializable {
     RGB24("RGB24", 24, "24 bit RGB"),
     RGB48("RGB48", 48, "48 bit RGB"),
     ARGB32("ARGB32", 32, "32 bit ARGB"),  
-    ARGB64("ARGB64", 64, "64 bit ARGB"),  
+    ARGB64("ARGB64", 64, "64 bit ARGB"),
+    
+    BGR24("BGR24", 24, "24 bit BGR"),
         
     // Several Y/Cr/Cb based formats
     YUYV("YUYV", 16, "16 bit YUYV"),
