@@ -30,7 +30,11 @@ public enum Format implements Serializable {
     YUV410P("YUV410P", 10, "10 bit YUV410P"), 
 
     YUV420SP("YUV420SP", 12, "12 bit YUV420SP"), 
-    YUV422SP("YUV422SP", 16, "16 bit YUV422SP"), 
+    YUV422SP("YUV422SP", 16, "16 bit YUV422SP"),
+    
+    // Timo's taskgraph formats
+    TGDOUBLEARGB("TGDOUBLEARGB", 4 * Double.SIZE, "TaskGraph 4 doubles ARGB"),
+    TGDOUBLEGREY("TGDOUBLEGREY", Double.SIZE, "TaskGraph 1 doubles GREY"),
         
     // Several compressed formats
     JPG("JPG", 0, "JPG Compressed", true), 
@@ -45,7 +49,7 @@ public enum Format implements Serializable {
 
     // NONE format. It is sometime convenient to throw away all image data 
     // except for the meta information. Use this format to indicate that the 
-    // image doe not contain any real pixels. 
+    // image does not contain any real pixels. 
     NONE("NONE", 0, "NONE");
     
     private final int bpp;

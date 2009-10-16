@@ -47,8 +47,14 @@ public class Conversion {
             addConvertor(Format.ARGB32, new ARGB32toBufferedImage());
             addConvertor(Format.ARGB32, Format.RGB24, new ARGB32toRGB24());
             addConvertor(Format.ARGB32, Format.JPG, new ARGB32toJPG());
+            addConvertor(Format.ARGB32, Format.TGDOUBLEARGB, new ARGB32toTGDOUBLEARGB());
             
             addConvertor(Format.ARGB64, new ARGB64toBufferedImage());
+            
+            addConvertor(Format.TGDOUBLEARGB, Format.ARGB32, new TGDOUBLEARGBtoARGB32());
+            addConvertor(Format.TGDOUBLEARGB, Format.TGDOUBLEGREY, new TGDOUBLEARGBtoTGDOUBLEGREY());
+            
+            addConvertor(Format.TGDOUBLEGREY, Format.TGDOUBLEARGB, new TGDOUBLEGREYtoTGDOUBLEARGB());
             
             addConvertor(Format.GREY, Format.ARGB32, new GREYtoARGB32());
 

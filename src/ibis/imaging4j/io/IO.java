@@ -31,7 +31,7 @@ public class IO {
             out.flush();
             out.close();
         } else if (file.getName().endsWith(".rgb")
-                || file.getName().endsWith(".rgb")) {
+                || file.getName().endsWith(".RGB")) {
             Image rgb;
             if (image.getFormat() == Format.RGB24) {
                 rgb = image;
@@ -48,7 +48,6 @@ public class IO {
 
             out.flush();
             fileOut.close();
-
         } else {
             throw new UnsupportedFormatException("cannot save to file: \""
                     + file + "\", unsupported file format");
