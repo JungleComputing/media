@@ -29,12 +29,13 @@ public class ImageViewer extends JPanel {
         image = null;
 
         frame = new JFrame("ConversionTest");
-        frame.setMinimumSize(new Dimension(width, height));
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        frame.setMinimumSize(new Dimension(width, height));
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         // Create and set up the content pane.
         this.setOpaque(true); // content panes must be opaque
-        this.setMinimumSize(new Dimension(width, height));
+//        this.setMinimumSize(new Dimension(width, height));
+        this.setPreferredSize(new Dimension(width, height));
         frame.setContentPane(this);
 
         // Display the window.

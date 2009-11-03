@@ -1,25 +1,25 @@
 package ibis.imaging4j.conversion;
 
 import java.nio.ByteBuffer;
-import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
 
 import ibis.imaging4j.Format;
 import ibis.imaging4j.Image;
 
-public class TGDOUBLEARGBtoARGB32 extends Convertor {
+public class TGFLOATARGBtoARGB32 extends Convertor {
 
 	private final static int COST = 4 + 1;
 
-	public TGDOUBLEARGBtoARGB32() {
+	public TGFLOATARGBtoARGB32() {
 		super(COST);
 	}
 
 	@Override
 	public Image convert(Image in, Image out) throws ConversionException {
 
-		if (in.getFormat() != Format.TGDOUBLEARGB) {
+		if (in.getFormat() != Format.TGFLOATARGB) {
 			throw new ConversionException(
-					"input image not in TGDOUBLEARGB format");
+					"input image not in TGFLOATARGB format");
 		}
 
 		if (out == null) {
@@ -35,7 +35,7 @@ public class TGDOUBLEARGBtoARGB32 extends Convertor {
 			throw new ConversionException("Target image has wrong dimensions!");
 		}
 
-		DoubleBuffer dataIn = in.getData().asDoubleBuffer();
+		FloatBuffer dataIn = in.getData().asFloatBuffer();
 		ByteBuffer dataOut = out.getData().duplicate();
 
 		dataIn.clear();

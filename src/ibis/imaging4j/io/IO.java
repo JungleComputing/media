@@ -71,7 +71,7 @@ public class IO {
 
             return result;
         } else if (file.getName().endsWith(".rgb")
-                || file.getName().endsWith(".rgb")) {
+                || file.getName().endsWith(".RGB")) {
             FileInputStream fileIn = new FileInputStream(file);
             DataInputStream in = new DataInputStream(fileIn);
 
