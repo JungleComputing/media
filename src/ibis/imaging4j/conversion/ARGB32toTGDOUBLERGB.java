@@ -6,11 +6,11 @@ import java.nio.DoubleBuffer;
 import ibis.imaging4j.Format;
 import ibis.imaging4j.Image;
 
-public class ARGB32toTGDOUBLEARGB extends Convertor {
+public class ARGB32toTGDOUBLERGB extends Convertor {
 
     private final static int COST = 4 + 1;
 
-    public ARGB32toTGDOUBLEARGB() {
+    public ARGB32toTGDOUBLERGB() {
         super(COST);
     }
 
@@ -22,11 +22,11 @@ public class ARGB32toTGDOUBLEARGB extends Convertor {
         }
 
         if (out == null) {
-            out = new Image(Format.TGDOUBLEARGB, in.getWidth(), in.getHeight());
+            out = new Image(Format.TGDOUBLERGB, in.getWidth(), in.getHeight());
         }
 
-        if (out.getFormat() != Format.TGDOUBLEARGB) {
-            throw new ConversionException("output image not in TGDOUBLEARGB format");
+        if (out.getFormat() != Format.TGDOUBLERGB) {
+            throw new ConversionException("output image not in TGDOUBLERGB format");
         }
 
         if (out.getWidth() != in.getWidth()
@@ -44,10 +44,11 @@ public class ARGB32toTGDOUBLEARGB extends Convertor {
         while (dataIn.hasRemaining()) {
             //get argb value
             dataIn.get(argb);
+            final double a = ((double)(argb[3] & 0xff))/255.;
             //put rgb (skip a)
-            for(int i = 0; i < 4; i++) {
-            	// TODO really need normalization?? guess not!
-            	dataOut.put(((double)(argb[i] & 0xff))/255);
+            for(int i = 0; i < 3; i++) {
+            	final double val = ((double)(argb[i] & 0xff))/255.;
+            	dataOut.put(val*a);
 //            	dataOut.put((double)(argb[i] & 0xff));
             }
         }

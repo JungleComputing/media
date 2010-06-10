@@ -33,6 +33,7 @@ public class ImageViewer extends JPanel {
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         // Create and set up the content pane.
+        
         this.setOpaque(true); // content panes must be opaque
 //        this.setMinimumSize(new Dimension(width, height));
         this.setPreferredSize(new Dimension(width, height));
@@ -40,6 +41,7 @@ public class ImageViewer extends JPanel {
 
         // Display the window.
         frame.pack();
+        frame.setLocationByPlatform(true);
         frame.setVisible(true);
     }
 

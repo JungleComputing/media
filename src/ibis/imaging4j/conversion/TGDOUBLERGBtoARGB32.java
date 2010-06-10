@@ -6,20 +6,20 @@ import java.nio.DoubleBuffer;
 import ibis.imaging4j.Format;
 import ibis.imaging4j.Image;
 
-public class TGDOUBLEARGBtoARGB32 extends Convertor {
+public class TGDOUBLERGBtoARGB32 extends Convertor {
 
 	private final static int COST = 4 + 1;
 
-	public TGDOUBLEARGBtoARGB32() {
+	public TGDOUBLERGBtoARGB32() {
 		super(COST);
 	}
 
 	@Override
 	public Image convert(Image in, Image out) throws ConversionException {
 
-		if (in.getFormat() != Format.TGDOUBLEARGB) {
+		if (in.getFormat() != Format.TGDOUBLERGB) {
 			throw new ConversionException(
-					"input image not in TGDOUBLEARGB format");
+					"input image not in TGDOUBLERGB format");
 		}
 
 		if (out == null) {
@@ -66,9 +66,10 @@ public class TGDOUBLEARGBtoARGB32 extends Convertor {
 		
 		
 		byte[] argb = new byte[4];
+		argb[3] = (byte) 0xff;
 
 		while (dataIn.hasRemaining()) {
-			for (int i = 0; i < 4; i++) {
+			for (int i = 0; i < 3; i++) {
 //				int val = (int) (dataIn.get() * 256);
 				int val = (int) ((dataIn.get() - min) * multiplier);
 				if (val == 256) {

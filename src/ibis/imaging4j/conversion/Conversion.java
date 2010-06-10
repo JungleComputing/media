@@ -48,13 +48,19 @@ public class Conversion {
             addConvertor(Format.ARGB32, Format.RGB24, new ARGB32toRGB24());
             addConvertor(Format.ARGB32, Format.JPG, new ARGB32toJPG());
             addConvertor(Format.ARGB32, Format.TGDOUBLEARGB, new ARGB32toTGDOUBLEARGB());
+//            addConvertor(Format.ARGB32, Format.TGDOUBLERGB, new ARGB32toTGDOUBLERGB());
             addConvertor(Format.ARGB32, Format.TGFLOATARGB, new ARGB32toTGFLOATARGB());
             
             addConvertor(Format.ARGB64, new ARGB64toBufferedImage());
             
             addConvertor(Format.TGDOUBLEARGB, Format.ARGB32, new TGDOUBLEARGBtoARGB32());
             addConvertor(Format.TGDOUBLEARGB, Format.TGDOUBLEGREY, new TGDOUBLEARGBtoTGDOUBLEGREY());
+            
+//            addConvertor(Format.TGDOUBLERGB, Format.ARGB32, new TGDOUBLERGBtoARGB32());
+//            addConvertor(Format.TGDOUBLERGB, Format.TGDOUBLEGREY, new TGDOUBLERGBtoTGDOUBLEGREY());
+            
             addConvertor(Format.TGDOUBLEGREY, Format.TGDOUBLEARGB, new TGDOUBLEGREYtoTGDOUBLEARGB());
+//            addConvertor(Format.TGDOUBLEGREY, Format.TGDOUBLERGB, new TGDOUBLEGREYtoTGDOUBLERGB());
             addConvertor(Format.TGDOUBLEGREY, Format.GREY, new TGDOUBLEGREYtoGREY());
             
             addConvertor(Format.TGFLOATARGB, Format.ARGB32, new TGFLOATARGBtoARGB32());

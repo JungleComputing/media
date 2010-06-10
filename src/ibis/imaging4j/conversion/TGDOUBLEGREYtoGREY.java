@@ -38,6 +38,27 @@ public class TGDOUBLEGREYtoGREY extends Convertor {
 		DoubleBuffer dataIn = in.getData().asDoubleBuffer();
 		ByteBuffer dataOut = out.getData().duplicate();
 
+		double max = dataIn.get();
+		double min = max;
+		while (dataIn.hasRemaining()) {
+			final double val = dataIn.get();
+			if(val > max) {
+				max = val;
+			} else if(val < min) {
+				min = val;
+			}
+		}
+		dataIn.clear();
+		
+		double multiplier = 256 / (max - min);
+		
+		System.out.println("========");
+		System.out.println("TGDOUBLEGREYtoGREY converter:");
+		System.out.println("max: " + max);
+		System.out.println("min: " + min);
+		System.out.println("multiplier: " + multiplier);
+		System.out.println("========");		
+		
 		dataIn.clear();
 		dataOut.clear();
 
@@ -45,7 +66,8 @@ public class TGDOUBLEGREYtoGREY extends Convertor {
 
 		while (dataIn.hasRemaining()) {
 
-			int val = (int) (dataIn.get() * 256);
+//			int val = (int) (dataIn.get() * 256);
+			int val = (int) ((dataIn.get() - min) * multiplier);
 			if (val == 256) {
 				val--;
 			}
