@@ -1,9 +1,9 @@
 package ibis.imaging4j.conversion;
 
-import java.nio.FloatBuffer;
-
 import ibis.imaging4j.Format;
 import ibis.imaging4j.Image;
+
+import java.nio.FloatBuffer;
 
 public class TGFLOATARGBtoTGFLOATGREY extends Convertor {
 

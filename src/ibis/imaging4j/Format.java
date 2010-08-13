@@ -34,9 +34,10 @@ public enum Format implements Serializable {
     
     // Timo's taskgraph formats
     TGDOUBLEARGB("TGDOUBLEARGB", 4 * Double.SIZE, "TaskGraph 4 doubles ARGB"),
-    TGDOUBLERGB("TGDOUBLERGB", 3 * Double.SIZE, "TaskGraph 4 doubles RGB"),
+    TGDOUBLERGB("TGDOUBLERGB", 3 * Double.SIZE, "TaskGraph 3 doubles RGB"),
     TGDOUBLEGREY("TGDOUBLEGREY", Double.SIZE, "TaskGraph 1 double GREY"),
     TGFLOATARGB("TGFLOATARGB", 4 * Float.SIZE, "TaskGraph 4 floats ARGB"),
+    TGFLOATRGB("TGFLOATRGB", 3 * Float.SIZE, "TaskGraph 3 floats RGB"),
     TGFLOATGREY("TGFLOATGREY", Float.SIZE, "TaskGraph 1 float GREY"),
         
     // Several compressed formats
