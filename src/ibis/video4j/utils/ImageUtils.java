@@ -4,51 +4,52 @@ package ibis.video4j.utils;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+//import java.io.ByteArrayInputStream;
+//import java.io.ByteArrayOutputStream;
+//import java.io.IOException;
 
-import com.sun.image.codec.jpeg.ImageFormatException;
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGEncodeParam;
-import com.sun.image.codec.jpeg.JPEGImageDecoder;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
+
+//import com.sun.image.codec.jpeg.ImageFormatException;
+//import com.sun.image.codec.jpeg.JPEGCodec;
+//import com.sun.image.codec.jpeg.JPEGEncodeParam;
+//import com.sun.image.codec.jpeg.JPEGImageDecoder;
+//import com.sun.image.codec.jpeg.JPEGImageEncoder;
 
 public class ImageUtils {
     
-    public static byte [] encode(int [] pixels, int w, int h, int quality) throws ImageFormatException, IOException {
-        
-        BufferedImage b = new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
-        b.setRGB(0, 0, w, h, pixels, 0, w);
-        return encodeJPEG(b, quality);
-        
-    }
-    
-    public static byte [] encodeJPEG(BufferedImage image, int quality) throws ImageFormatException, IOException {
-        
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        
-        JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
-        JPEGEncodeParam param = encoder.getDefaultJPEGEncodeParam(image);
-
-        quality = Math.max(0, Math.min(quality, 100));
-        
-        param.setQuality((float)quality / 100.0f, false);
-        
-        encoder.setJPEGEncodeParam(param);
-        encoder.encode(image);
-
-        return out.toByteArray();
-    }
-    
-    public static BufferedImage decodeJPEG(byte [] bytes) throws ImageFormatException, IOException {
-        
-        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-        
-        JPEGImageDecoder decoder = JPEGCodec.createJPEGDecoder(in);
-        
-        return decoder.decodeAsBufferedImage();
-    }
+//    public static byte [] encode(int [] pixels, int w, int h, int quality) throws ImageFormatException, IOException {
+//        
+//        BufferedImage b = new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
+//        b.setRGB(0, 0, w, h, pixels, 0, w);
+//        return encodeJPEG(b, quality);
+//        
+//    }
+//    
+//    public static byte [] encodeJPEG(BufferedImage image, int quality) throws ImageFormatException, IOException {
+//        
+//        ByteArrayOutputStream out = new ByteArrayOutputStream();
+//        
+//        JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
+//        JPEGEncodeParam param = encoder.getDefaultJPEGEncodeParam(image);
+//
+//        quality = Math.max(0, Math.min(quality, 100));
+//        
+//        param.setQuality((float)quality / 100.0f, false);
+//        
+//        encoder.setJPEGEncodeParam(param);
+//        encoder.encode(image);
+//
+//        return out.toByteArray();
+//    }
+//    
+//    public static BufferedImage decodeJPEG(byte [] bytes) throws ImageFormatException, IOException {
+//        
+//        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+//        
+//        JPEGImageDecoder decoder = JPEGCodec.createJPEGDecoder(in);
+//        
+//        return decoder.decodeAsBufferedImage();
+//    }
     
     public static BufferedImage scale(BufferedImage bi, int maxW, int maxH, boolean keepAspect) { 
         
