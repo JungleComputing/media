@@ -41,7 +41,7 @@
 
 	<target name="build-native" depends="build-native-headers">
 
-		<echo message="${native.compiler.options} ${native.compiler.includes} ${native.compiler.input} ${native.compiler.output}" />
+		<echo message="Using native compile command: ${native.compiler} ${native.compiler.options} ${native.compiler.includes} ${native.compiler.input} ${native.compiler.output}" />
 
 		<exec executable="${native.compiler}">
 
@@ -49,7 +49,7 @@
 		</exec>
 
 		<delete failonerror="false" verbose="true">
-			<fileset dir="." includes="*.so,*.lib,*.exp" />
+			<fileset dir="." includes="*.lib,*.exp" />
 		</delete>
 	</target>
 
@@ -82,7 +82,7 @@
 		<delete failonerror="false" dir="${builddir}" />
 		<delete failonerror="false" dir="${distdir}" />
 		<delete failonerror="false" verbose="true">
-			<fileset dir="." includes="*.so,*.lib,*.exp" />
+			<fileset dir="." includes="*.lib,*.exp" />
 		</delete>
 	</target>
 
