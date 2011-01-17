@@ -5,19 +5,19 @@ import java.nio.ByteBuffer;
 import ibis.imaging4j.Format;
 import ibis.imaging4j.Image;
 
-public class BGR24toARGB32 extends Convertor {
+public class BGRA32toARGB32 extends Convertor {
 
-    private final static int COST = 3 + 1;
+    private final static int COST = 4 + 1;
     
-    public BGR24toARGB32() {
+    public BGRA32toARGB32() {
         super(COST);
     }
 
     @Override
     public Image convert(Image in, Image out) throws ConversionException {
 
-        if (in.getFormat() != Format.BGR24) {
-            throw new ConversionException("input image not in BGR24 format");
+        if (in.getFormat() != Format.BGRA32) {
+            throw new ConversionException("input image not in BGRA32 format");
         }
 
         if (out == null) {
@@ -38,22 +38,22 @@ public class BGR24toARGB32 extends Convertor {
 
         dataIn.clear();
         dataOut.clear();
-
-        byte[] argb = new byte[4];
         
-        //set a to max (opaque)
-        argb[0] = (byte) 0xFF;
+        byte b;
+        byte g;
+        byte r;
+        byte a;
+        
         while (dataIn.hasRemaining()) {
-            //get bgr value (skip first "a" element in array)
-            dataIn.get(argb, 1, 3);
-            
-            //swap b and r to get to argb instead of abgr
-            byte tmp = argb[1];
-            argb[1] = argb[3];
-            argb[3] = tmp;
+        	b = dataIn.get();
+        	g = dataIn.get();
+        	r = dataIn.get();
+        	a = dataIn.get();
 
-            //put argb
-            dataOut.put(argb);
+        	dataOut.put(a);
+        	dataOut.put(r);
+        	dataOut.put(g);
+        	dataOut.put(b);
         }
 
         return out;

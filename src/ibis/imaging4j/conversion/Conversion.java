@@ -84,6 +84,8 @@ public class Conversion {
             addConvertor(Format.BGR24, Format.ARGB32, new BGR24toARGB32());
             addConvertor(Format.BGR24, Format.RGB24, new BGR24toRGB24());
             
+            addConvertor(Format.BGRA32, Format.ARGB32, new BGRA32toARGB32());
+            
             addConvertor(Format.RGB48, new RGB48toBufferedImage());
             
             addConvertor(Format.YUV420SP, new YUV420SPtoBufferedImage());

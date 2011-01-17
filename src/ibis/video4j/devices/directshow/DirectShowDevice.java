@@ -2,11 +2,18 @@ package ibis.video4j.devices.directshow;
 
 import java.nio.ByteBuffer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ibis.imaging4j.Format;
+import ibis.imaging4j.Image;
 import ibis.video4j.VideoConsumer;
 import ibis.video4j.VideoDeviceDescription;
 import ibis.video4j.devices.VideoSource;
 
 public class DirectShowDevice extends VideoSource {
+	
+	private static final Logger logger = LoggerFactory.getLogger(DirectShowDevice.class);
 
     private native int configureDevice(int deviceNumber, int width, int height);
     
@@ -61,14 +68,14 @@ public class DirectShowDevice extends VideoSource {
         
         while (!getDone()) { 
             
-            System.out.println("Grabbing image!");
+        	logger.debug("Grabbing image!");
             
             if (grab(deviceNumber) == 0) { 
                 System.out.println("Failed to grab image!");
                 return;
             }
             
-            System.out.println("Waiting for image to return!");
+            logger.debug("Waiting for image to return!");
             
             int result = grabDone(deviceNumber);
             
@@ -80,35 +87,39 @@ public class DirectShowDevice extends VideoSource {
                     // ignore
                 }
 
-                System.out.println("Waiting for image to return!");
+                logger.debug("Waiting for image to return!");
 
                 result = grabDone(deviceNumber);
             }
             
-            if (result == 1) { 
-
-                System.out.println("FIX WINDOWS VERSION!!!");
-                
-                /*
-                System.out.println("Got image!!");
-                
-                int [] tmp = consumer.getBuffer(width, height, 0, width*height);
-
-                buffer.rewind();
-                
-                for (int i=0;i<tmp.length;i++) { 
-                    
-                    int a = 0xFF & buffer.get();
-                    int r = 0xFF & buffer.get();
-                    int g = 0xFF & buffer.get();
-                    int b = 0xFF & buffer.get();
-                    
-                    tmp[i] = 0xFF000000 | r << 16 | g << 8 | b;
-                }
-                
-                consumer.gotImage(tmp, 0);
-                
-                */
+            if (result == 1) {
+            	Image image = new Image(Format.BGRA32, getWidth(), getHeight(), buffer);
+//            	
+//                buffer.rewind();
+//                
+//                for (int i=0;buffer.hasRemaining();i++) { 
+//                    
+////                    int a = 0xFF & buffer.get();
+////                    int r = 0xFF & buffer.get();
+////                    int g = 0xFF & buffer.get();
+////                    int b = 0xFF & buffer.get();
+////                    
+////                    tmp[i] = 0xFF000000 | r << 16 | g << 8 | b;
+//                	
+//                	byte b = buffer.get();
+//                	byte g = buffer.get();
+//                	byte r = buffer.get();
+//                	byte a = buffer.get();
+//                	
+//                	
+//                	image.getData().put(a);
+//                	image.getData().put(r);
+//                	image.getData().put(g);
+//                	image.getData().put(b);
+//
+//                }
+//                
+                consumer.gotImage(image);
                 
             } else { 
                 System.out.println("Failed to grab image!");

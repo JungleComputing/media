@@ -27,11 +27,13 @@ public class DirectShowDiscovery implements VideoDeviceDiscovery {
 
             if (description != null) {
             	
-            	//FIXME:capabilities not filled
-            	
                 HashMap<Format, Capability> capabilities = 
                     new HashMap<Format, Capability>();
+                
+                //escapi supports only one format, and all resolutions we want
+                Capability capability = new Capability(Format.BGRA32);
 
+                capabilities.put(Format.BGRA32, capability);
             	
                 devices.add(new VideoDeviceDescription("device" + i, 
                         description, i, 
