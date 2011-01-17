@@ -45,6 +45,8 @@ public class ViewerDemo extends JPanel implements ActionListener {
         try { 
             devices = VideoDeviceFactory.availableDevices(); 
         } catch (Exception e) {
+        	e.printStackTrace(System.err);
+        	System.exit(1);
             devices = new VideoDeviceDescription[0];
         }
         

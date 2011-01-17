@@ -28,8 +28,10 @@ int setupESCAPI()
 {
   /* Load DLL dynamically */
   HMODULE capdll = LoadLibrary("escapi.dll");
-  if (capdll == NULL)
+  if (capdll == NULL) {
+  	printf("Could not load escapi.dll, error = %ul", GetLastError());
     return 0;
+  }
 
   /* Fetch function entry points */
   countCaptureDevices = (countCaptureDevicesProc)GetProcAddress(capdll, "countCaptureDevices");

@@ -35,7 +35,6 @@ public abstract class VideoDeviceFactory {
         String library = null;
         
         if (os.equals("linux")) { 
-            
             if (arch.equals("i386")) { 
                 library = "V4J-Linux-i386";
             } else if (arch.equals("amd64")) { 
@@ -49,9 +48,16 @@ public abstract class VideoDeviceFactory {
             
             factory = new Video4LinuxDeviceFactory();
             
-        } else if (os.startsWith("windows")) { 
-       
-            library = "libV4J-Windows XP-x86";
+        } else if (os.startsWith("windows")) {
+            if (arch.equals("x86")) { 
+                library = "libV4J-Windows-x86";
+            } else if (arch.equals("amd64")) {
+            	throw new Exception("64-bit Windows not supported yet (please use a 32 bit JVM)");
+                //library = "libV4J-Windows-amd64";                
+            } else { 
+                throw new Exception("Unsupported OS/architecture: " + os 
+                        + "/" + arch);
+            }
             
             factory = new DirectShowDeviceFactory();
             
@@ -66,6 +72,7 @@ public abstract class VideoDeviceFactory {
         } catch (Throwable e) { 
             factory = null;
             System.err.println("Failed to load library: " + library);
+            e.printStackTrace(System.err);
             throw new Exception("Failed to load library: " + library, e);
         }
     }

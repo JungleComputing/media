@@ -12,7 +12,6 @@ public class DirectShowDiscovery implements VideoDeviceDiscovery {
     
     private native int countDevices();
     private native String getDeviceName(int device);
-    
         
     public VideoDeviceDescription[] discover() {
     
