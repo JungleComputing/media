@@ -56,7 +56,17 @@ public abstract class VideoDeviceFactory {
                 //library = "libV4J-Windows-amd64";                
             } else { 
                 throw new Exception("Unsupported OS/architecture: " + os 
-                        + "/" + arch);
+                        + "/" + arch);            
+            }
+            
+            //we need the escapi library too, load it first
+            try { 
+                System.loadLibrary("escapi");
+            } catch (Throwable e) { 
+                factory = null;
+                System.err.println("Failed to load escapi library");
+                e.printStackTrace(System.err);
+                throw new Exception("Failed to load escapi library", e);
             }
             
             factory = new DirectShowDeviceFactory();

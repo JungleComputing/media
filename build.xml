@@ -1,6 +1,6 @@
 <project name="v4j" default="build" basedir=".">
 
-	<property name="version" value="-0.2" />
+	<property name="version" value="-0.3" />
 
 	<property name="jar" value="v4j${version}.jar" />
 

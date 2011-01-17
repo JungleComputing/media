@@ -55,7 +55,7 @@ public class DirectShowDevice extends VideoSource {
     @Override
     public void close() {
         setDone();
-        closeDevice(deviceNumber);
+
     }
 
     @Override
@@ -72,6 +72,7 @@ public class DirectShowDevice extends VideoSource {
             
             if (grab(deviceNumber) == 0) { 
                 System.out.println("Failed to grab image!");
+                closeDevice(deviceNumber);
                 return;
             }
             
@@ -94,38 +95,16 @@ public class DirectShowDevice extends VideoSource {
             
             if (result == 1) {
             	Image image = new Image(Format.BGRA32, getWidth(), getHeight(), buffer);
-//            	
-//                buffer.rewind();
-//                
-//                for (int i=0;buffer.hasRemaining();i++) { 
-//                    
-////                    int a = 0xFF & buffer.get();
-////                    int r = 0xFF & buffer.get();
-////                    int g = 0xFF & buffer.get();
-////                    int b = 0xFF & buffer.get();
-////                    
-////                    tmp[i] = 0xFF000000 | r << 16 | g << 8 | b;
-//                	
-//                	byte b = buffer.get();
-//                	byte g = buffer.get();
-//                	byte r = buffer.get();
-//                	byte a = buffer.get();
-//                	
-//                	
-//                	image.getData().put(a);
-//                	image.getData().put(r);
-//                	image.getData().put(g);
-//                	image.getData().put(b);
-//
-//                }
-//                
+   
                 consumer.gotImage(image);
                 
             } else { 
                 System.out.println("Failed to grab image!");
+                closeDevice(deviceNumber);
                 return;
             }
-        }            
+        }
+        closeDevice(deviceNumber);
     }
 
     /*
