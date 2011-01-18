@@ -61,14 +61,12 @@ public class QuickTimeDevice extends VideoSource {
             System.err.println(2);
             grabber = new SequenceGrabber();
             
-
-            
             grabber.setGWorld(graphics, null);
             channel = new SGVideoChannel(grabber);
             System.err.println(3);
             channel.setBounds(bounds);
             channel.setUsage(StdQTConstants.seqGrabPreview);
-//            channel.settingsDialog();
+            //channel.settingsDialog();
             System.err.println(4);
             grabber.prepare(true, false);
             grabber.startPreview();
@@ -151,6 +149,10 @@ public class QuickTimeDevice extends VideoSource {
 
     @Override
     protected void grab() {
+        ByteBuffer buffer = ByteBuffer.allocate(width * height * 4);
+
+        Image image = new Image(Format.BGRA32, getWidth(), getHeight(),
+                buffer);
         while (!getDone()) {
 
             logger.debug("Grabbing image!");
@@ -161,18 +163,19 @@ public class QuickTimeDevice extends VideoSource {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            
-           // pixMap.getBytes();
-            
-            ByteBuffer buffer = ByteBuffer.allocate(width * height * 4);
-            
-           rawEncodedImage.copyToArray(0, buffer.array(), 0, buffer.array().length);
-
-            Image image = new Image(Format.BGRA32, getWidth(), getHeight(),
-                    buffer);
+         
+        
+            rawEncodedImage.copyToArray(0, buffer.array(), 0, buffer.array().length);
 
             consumer.gotImage(image);
 
+            
+            //limit framerate somewhat
+            try {
+                Thread.sleep(25);
+            } catch (InterruptedException e) {
+              
+            }
         }
         dispose();
     }
