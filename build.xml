@@ -28,7 +28,7 @@
 
 	<target name="compile" depends="prepare">
 
-		<javac classpathref="external.jars" destdir="${builddir}" srcdir="${srcdir}" debug="true" target="1.5" includes="**/*.java" />
+		<javac classpathref="external.jars" destdir="${builddir}" srcdir="${srcdir}" debug="true" target="1.5" includes="**/*.java" excludes="ibis/video4j/devices/quicktime/*.java" />
 	</target>
 
 	<target name="build-native-headers" depends="compile">

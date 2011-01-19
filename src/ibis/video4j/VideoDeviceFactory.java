@@ -4,8 +4,6 @@ import ibis.imaging4j.Format;
 import ibis.video4j.devices.VideoSource;
 import ibis.video4j.devices.directshow.DirectShowDeviceFactory;
 import ibis.video4j.devices.directshow.DirectShowDiscovery;
-import ibis.video4j.devices.quicktime.QuickTimeDeviceFactory;
-import ibis.video4j.devices.quicktime.QuickTimeDiscovery;
 import ibis.video4j.devices.video4linux.Video4LinuxDeviceFactory;
 import ibis.video4j.devices.video4linux.Video4LinuxDiscovery;
 
@@ -77,7 +75,10 @@ public abstract class VideoDeviceFactory {
         } else if (os.equals("mac os x")) {
             System.out.println("No library needed on osx");
             
-            factory = new QuickTimeDeviceFactory();
+            Class<?> factoryClass = Class.forName("ibis.video4j.devices.quicktime.QuickTimeDeviceFactory");
+
+        	factory = (VideoDeviceFactory) factoryClass.getConstructor().newInstance();
+            
         } else {
 
             throw new Exception("Unsupported OS: " + os + "/" + arch);
@@ -112,7 +113,11 @@ public abstract class VideoDeviceFactory {
         } else if (os.startsWith("windows")) {
             discovery = new DirectShowDiscovery();
         } else if (os.equals("mac os x")) {
-            discovery = new QuickTimeDiscovery();
+        	Class<?> discoveryClass = Class.forName("ibis.video4j.devices.quicktime.QuickTimeDiscovery");
+
+        	discovery = (VideoDeviceDiscovery) discoveryClass.getConstructor().newInstance();
+        	
+        	
         } else {
             throw new Exception("Unsupported OS: " + os);
         }
