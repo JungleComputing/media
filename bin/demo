@@ -1,5 +1,5 @@
 #!/bin/sh
 
-MAIN_CLASS=ibis.test.ViewerDemo
+MAIN_CLASS=ibis.media.test.ViewerDemo
 
 exec java -classpath .:external/*:jars/* -Djava.library.path=. $MAIN_CLASS $*

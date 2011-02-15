@@ -1,2 +1,2 @@
-java -cp ".;jars\*;external\*" -Djava.library.path=. ibis.test.Scan
+java -cp ".;jars\*;external\*" -Djava.library.path=. ibis.media.test.Scan
 

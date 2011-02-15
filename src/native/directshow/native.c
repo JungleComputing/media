@@ -4,8 +4,8 @@
 
 #include "escapi.h"
 
-#include "ibis_video4j_devices_directshow_DirectShowDiscovery.h"
-#include "ibis_video4j_devices_directshow_DirectShowDevice.h"
+#include "ibis_media_video_devices_directshow_DirectShowDiscovery.h"
+#include "ibis_media_video_devices_directshow_DirectShowDevice.h"
 
 #define MAX_DEVICES 8
 
@@ -65,7 +65,7 @@ int setupESCAPI()
   return countCaptureDevices();
 }
 
-JNIEXPORT jint JNICALL Java_ibis_video4j_devices_directshow_DirectShowDiscovery_countDevices
+JNIEXPORT jint JNICALL Java_ibis_media_video_devices_directshow_DirectShowDiscovery_countDevices
  (JNIEnv *env, jobject this)
 {
 	if (initialized == 0) { 
@@ -77,7 +77,7 @@ JNIEXPORT jint JNICALL Java_ibis_video4j_devices_directshow_DirectShowDiscovery_
 	return countCaptureDevices();
 }
 
-JNIEXPORT jstring JNICALL Java_ibis_video4j_devices_directshow_DirectShowDiscovery_getDeviceName
+JNIEXPORT jstring JNICALL Java_ibis_media_video_devices_directshow_DirectShowDiscovery_getDeviceName
  (JNIEnv *env, jobject this, jint device)
 {
 	char buffer[1024];
@@ -115,7 +115,7 @@ int callbackAddBuffer(JNIEnv *env, jobject this, jobject buffer)
         return 1;
 }
 
-JNIEXPORT jint JNICALL Java_ibis_video4j_devices_directshow_DirectShowDevice_configureDevice
+JNIEXPORT jint JNICALL Java_ibis_media_video_devices_directshow_DirectShowDevice_configureDevice
  (JNIEnv *env, jobject this, jint device, jint width, jint height)
 {
 	int res; 
@@ -139,7 +139,7 @@ JNIEXPORT jint JNICALL Java_ibis_video4j_devices_directshow_DirectShowDevice_con
 	}
 }
 
-JNIEXPORT jint JNICALL Java_ibis_video4j_devices_directshow_DirectShowDevice_grab
+JNIEXPORT jint JNICALL Java_ibis_media_video_devices_directshow_DirectShowDevice_grab
  (JNIEnv *env, jobject this, jint device)
 {
 	if (devices[device].mWidth == 0) { 
@@ -150,7 +150,7 @@ JNIEXPORT jint JNICALL Java_ibis_video4j_devices_directshow_DirectShowDevice_gra
 	return 1;
 }	
 
-JNIEXPORT jint JNICALL Java_ibis_video4j_devices_directshow_DirectShowDevice_grabDone
+JNIEXPORT jint JNICALL Java_ibis_media_video_devices_directshow_DirectShowDevice_grabDone
  (JNIEnv *env, jobject this, jint device)
 {
 	if (devices[device].mWidth == 0) { 
@@ -160,7 +160,7 @@ JNIEXPORT jint JNICALL Java_ibis_video4j_devices_directshow_DirectShowDevice_gra
 	return isCaptureDone(device);
 }	
 
-JNIEXPORT jint JNICALL Java_ibis_video4j_devices_directshow_DirectShowDevice_closeDevice
+JNIEXPORT jint JNICALL Java_ibis_media_video_devices_directshow_DirectShowDevice_closeDevice
  (JNIEnv *env, jobject this, jint device)
 {
 	if (devices[device].mWidth == 0) { 

@@ -7,9 +7,9 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 
-#include "video4j.h"
-#include "ibis_video4j_devices_video4linux_Video4LinuxDevice.h"
-#include "ibis_video4j_devices_video4linux_Video4LinuxDiscovery.h"
+#include "ibis_media.h"
+#include "ibis_media_video_devices_video4linux_Video4LinuxDevice.h"
+#include "ibis_media_video_devices_video4linux_Video4LinuxDiscovery.h"
 
 #define DEBUG 0
 
@@ -1091,7 +1091,7 @@ printf("Doning streamon\n");
 
 
 
-jint Java_ibis_video4j_devices_video4linux_Video4LinuxDevice_initDevice(JNIEnv *env, jobject this, jstring device, jint deviceNumber, jint api)
+jint Java_ibis_media_video_devices_video4linux_Video4LinuxDevice_initDevice(JNIEnv *env, jobject this, jstring device, jint deviceNumber, jint api)
 {
 	if (api == 1) { 
 		return v4l_initDevice(env, this, device, deviceNumber);
@@ -1102,7 +1102,7 @@ jint Java_ibis_video4j_devices_video4linux_Video4LinuxDevice_initDevice(JNIEnv *
 	return -10;
 }
 
-jint Java_ibis_video4j_devices_video4linux_Video4LinuxDevice_configureDevice(JNIEnv *env, jobject this, jint deviceNumber, jint width, jint height, jint palette, jint fps, jint quality, jint bufferCount)
+jint Java_ibis_media_video_devices_video4linux_Video4LinuxDevice_configureDevice(JNIEnv *env, jobject this, jint deviceNumber, jint width, jint height, jint palette, jint fps, jint quality, jint bufferCount)
 {
 	struct vdevice *dev;	
 
@@ -1125,7 +1125,7 @@ fprintf(stderr, "####### configuring device FAILED %d\n", dev->v4l);
 } 
 
 
-jint Java_ibis_video4j_devices_video4linux_Video4LinuxDevice_grab(JNIEnv *env, jobject this, jint deviceNumber) 
+jint Java_ibis_media_video_devices_video4linux_Video4LinuxDevice_grab(JNIEnv *env, jobject this, jint deviceNumber) 
 {
 	struct vdevice *dev;	
 
@@ -1150,7 +1150,7 @@ jint Java_ibis_video4j_devices_video4linux_Video4LinuxDevice_grab(JNIEnv *env, j
 	return -10;
 }
 
-jint Java_ibis_video4j_devices_video4linux_Video4LinuxDevice_closeDevice(JNIEnv *env, jobject this, jint deviceNumber) 
+jint Java_ibis_media_video_devices_video4linux_Video4LinuxDevice_closeDevice(JNIEnv *env, jobject this, jint deviceNumber) 
 {
 	struct vdevice *dev;	
 	
@@ -1174,7 +1174,7 @@ jint Java_ibis_video4j_devices_video4linux_Video4LinuxDevice_closeDevice(JNIEnv 
 
 
 
-jboolean Java_ibis_video4j_devices_video4linux_Video4LinuxDiscovery_testDevice(JNIEnv *env, jobject this, jstring device, jint deviceNumber) 
+jboolean Java_ibis_media_video_devices_video4linux_Video4LinuxDiscovery_testDevice(JNIEnv *env, jobject this, jstring device, jint deviceNumber) 
 {
         const jbyte *str;
         int filedescriptor;
