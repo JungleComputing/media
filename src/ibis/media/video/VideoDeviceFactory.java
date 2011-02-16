@@ -36,11 +36,11 @@ public abstract class VideoDeviceFactory {
 
         if (os.equals("linux")) {
             if (arch.equals("i386")) {
-                library = "V4J-Linux-i386";
+                library = "im-Linux-i386";
             } else if (arch.equals("amd64")) {
-                library = "V4J-Linux-amd64";
+                library = "im-Linux-amd64";
             } else if (arch.equals("x86_64")) {
-                library = "V4J-Linux-x86_64";
+                library = "im-Linux-x86_64";
             } else {
                 throw new Exception("Unsupported OS/architecture: " + os + "/"
                         + arch);
@@ -50,11 +50,11 @@ public abstract class VideoDeviceFactory {
 
         } else if (os.startsWith("windows")) {
             if (arch.equals("x86")) {
-                library = "libV4J-Windows-x86";
+                library = "libim-Windows-x86";
             } else if (arch.equals("amd64")) {
                 throw new Exception(
                         "64-bit Windows not supported yet (please use a 32 bit JVM)");
-                // library = "libV4J-Windows-amd64";
+                // library = "libim-Windows-amd64";
             } else {
                 throw new Exception("Unsupported OS/architecture: " + os + "/"
                         + arch);
@@ -75,7 +75,7 @@ public abstract class VideoDeviceFactory {
         } else if (os.equals("mac os x")) {
             System.out.println("No library needed on osx");
             
-            Class<?> factoryClass = Class.forName("ibis.video4j.devices.quicktime.QuickTimeDeviceFactory");
+            Class<?> factoryClass = Class.forName("ibis.media.video.devices.quicktime.QuickTimeDeviceFactory");
 
         	factory = (VideoDeviceFactory) factoryClass.getConstructor().newInstance();
             
@@ -113,7 +113,7 @@ public abstract class VideoDeviceFactory {
         } else if (os.startsWith("windows")) {
             discovery = new DirectShowDiscovery();
         } else if (os.equals("mac os x")) {
-        	Class<?> discoveryClass = Class.forName("ibis.video4j.devices.quicktime.QuickTimeDiscovery");
+        	Class<?> discoveryClass = Class.forName("ibis.media.video.devices.quicktime.QuickTimeDiscovery");
 
         	discovery = (VideoDeviceDiscovery) discoveryClass.getConstructor().newInstance();
         	

@@ -2,4 +2,4 @@
 
 MAIN_CLASS=ibis.media.test.ViewerDemo
 
-exec java -classpath .:external/*:jars/* -Djava.library.path=. $MAIN_CLASS $*
+exec java -classpath .:external/*:jars/*:./* -Djava.library.path=. $MAIN_CLASS $*
