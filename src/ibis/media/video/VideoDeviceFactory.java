@@ -50,25 +50,34 @@ public abstract class VideoDeviceFactory {
 
         } else if (os.startsWith("windows")) {
             if (arch.equals("x86")) {
-                library = "libim-Windows-x86";
+            	library = "libim-Windows-x86";
+            	
+            	try {
+                    System.loadLibrary("escapi32");
+                } catch (Throwable e) {
+                    factory = null;
+                    System.err.println("Failed to load 32-bit escapi library");
+                    e.printStackTrace(System.err);
+                    throw new Exception("Failed to load 32-bit escapi library", e);
+                }
             } else if (arch.equals("amd64")) {
-                throw new Exception(
-                        "64-bit Windows not supported yet (please use a 32 bit JVM)");
-                // library = "libim-Windows-amd64";
+                 library = "libim-Windows-amd64";
+                 
+                 try {
+                     System.loadLibrary("escapi64");
+                 } catch (Throwable e) {
+                     factory = null;
+                     System.err.println("Failed to load 64-bit escapi library");
+                     e.printStackTrace(System.err);
+                     throw new Exception("Failed to load 64-bit escapi library", e);
+                 }
             } else {
                 throw new Exception("Unsupported OS/architecture: " + os + "/"
                         + arch);
             }
 
             // we need the escapi library too, load it first
-            try {
-                System.loadLibrary("escapi");
-            } catch (Throwable e) {
-                factory = null;
-                System.err.println("Failed to load escapi library");
-                e.printStackTrace(System.err);
-                throw new Exception("Failed to load escapi library", e);
-            }
+            
 
             factory = new DirectShowDeviceFactory();
 

@@ -27,7 +27,7 @@ struct SimpleCapParams devices[MAX_DEVICES];
 int setupESCAPI()
 {
   /* Load DLL dynamically */
-  HMODULE capdll = LoadLibrary("escapi.dll");
+  HMODULE capdll = LoadLibrary("escapi64.dll");
   if (capdll == NULL) {
   	printf("Could not load escapi.dll, error = %ul", GetLastError());
     return 0;
