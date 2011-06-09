@@ -47,6 +47,7 @@ public class DirectShowDevice extends VideoSource {
     }
     
     @SuppressWarnings("unused")
+    //This function is called by the C++ code, when the configuration step is done 
     private void addBuffer(ByteBuffer buffer) { 
         this.buffer = buffer;        
         System.out.println("GOT BUFFER of size " + buffer.capacity());
@@ -54,6 +55,7 @@ public class DirectShowDevice extends VideoSource {
         
     @Override
     public void close() {
+    	closeDevice(deviceNumber);
         setDone();
 
     }

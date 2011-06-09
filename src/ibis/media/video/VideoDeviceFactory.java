@@ -63,6 +63,7 @@ public abstract class VideoDeviceFactory {
             } else if (arch.equals("amd64")) {
                  library = "libim-Windows-amd64";
                  
+                 /*
                  try {
                      System.loadLibrary("escapi64");
                  } catch (Throwable e) {
@@ -71,6 +72,7 @@ public abstract class VideoDeviceFactory {
                      e.printStackTrace(System.err);
                      throw new Exception("Failed to load 64-bit escapi library", e);
                  }
+                 */
             } else {
                 throw new Exception("Unsupported OS/architecture: " + os + "/"
                         + arch);

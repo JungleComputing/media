@@ -75,12 +75,12 @@
 
     <target name="build-native" depends="build-native-headers">
 
-        <echo message="Using native compile command: ${native.compiler} ${native.compiler.options} ${native.compiler.includes} ${native.compiler.input} ${native.compiler.output}"
+        <echo message="Using native compile command: ${native.compiler} ${native.compiler.options} ${native.compiler.includes} ${native.compiler.input} ${native.compiler.output} ${native.compiler.libraries}"
         />
 
         <exec executable="${native.compiler}">
 
-            <arg line="${native.compiler.options} ${native.compiler.includes} ${native.compiler.input} ${native.compiler.output}"
+		<arg line="${native.compiler.options} ${native.compiler.includes} ${native.compiler.input} ${native.compiler.output} ${native.compiler.libraries}"
             />
         </exec>
 
