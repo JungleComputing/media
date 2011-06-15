@@ -45,10 +45,10 @@ public class BGR24toARGB32 extends Convertor {
         argb[0] = (byte) 0xFF;
         while (dataIn.hasRemaining()) {
             //get bgr value (skip first "a" element in array)
-            dataIn.get(argb, 1, 3);
+            dataIn.get(argb, 0, 3);
             
             //swap b and r to get to argb instead of abgr
-            byte tmp = argb[1];
+            byte tmp = argb[1];            
             argb[1] = argb[3];
             argb[3] = tmp;
 

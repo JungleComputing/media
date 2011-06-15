@@ -11,20 +11,17 @@ import ibis.media.video.VideoConsumer;
 import ibis.media.video.VideoDeviceDescription;
 import ibis.media.video.devices.VideoSource;
 
-public class DirectShowDevice extends VideoSource {
-	
+public class DirectShowDevice extends VideoSource {	
 	private static final Logger logger = LoggerFactory.getLogger(DirectShowDevice.class);
 
+	private native int getDeviceCapabilities(int deviceNumber);
     private native int configureDevice(int deviceNumber, int width, int height);
+    private native int startDevice(int deviceNumber);
+    private native int changeSize(int width, int height);    
+    private native boolean grabBuffer();
+    private native int closeDevice();
     
-    private native int grab(int deviceNumber);
-    
-    private native int grabDone(int deviceNumber);
-    
-    private native int closeDevice(int deviceNumber);
-    
-    private final int deviceNumber; 
-    
+    private final int deviceNumber;     
     private ByteBuffer buffer;
     
     public DirectShowDevice(VideoConsumer consumer, VideoDeviceDescription desc,
@@ -33,172 +30,61 @@ public class DirectShowDevice extends VideoSource {
 
         super(consumer, desc, width, height, delay, quality);
         
-        this.deviceNumber = desc.deviceNumber;
+        int result = 0;
         
-        int result = configureDevice(deviceNumber, width, height);
+        this.deviceNumber = desc.deviceNumber;      
         
-        if (result != 1) { 
+        result = configureDevice(deviceNumber, width, height);        
+        //changeSize(width, height);
+        
+        if (result != 0) { 
             initialized(false);
             throw new Exception("Failed to configure device " + deviceNumber 
                     + "(result = " + result +")");
         }
         
+        result = getDeviceCapabilities(deviceNumber);
+        
+        result = startDevice(deviceNumber);
+        
         initialized(true);
     }
     
-    @SuppressWarnings("unused")
-    //This function is called by the C++ code, when the configuration step is done 
     private void addBuffer(ByteBuffer buffer) { 
         this.buffer = buffer;        
-        System.out.println("GOT BUFFER of size " + buffer.capacity());
+        //System.out.println("GOT BUFFER of size " + buffer.capacity());
+    } 
+    
+    //private void grabDone(ByteBuffer buffer) {
+    private void grabDone() {
+    	Image image = new Image(Format.BGRA32, getWidth(), getHeight(), buffer);    	   
+    	consumer.gotImage(image);
     } 
         
     @Override
     public void close() {
-    	closeDevice(deviceNumber);
+    	closeDevice();    	
         setDone();
-
     }
 
     @Override
     public void setResolution(int width, int height) {
-        // TODO Auto-generated method stub        
+    	System.out.println("w: "+width+" h: "+height);
+        // TODO Auto-generated method stub
     }
 
     @Override
     protected void grab() {
-        
-        while (!getDone()) { 
-            
+        while (!getDone()) {
         	logger.debug("Grabbing image!");
             
-            if (grab(deviceNumber) == 0) { 
+        	boolean result = grabBuffer();
+            if (!result) { 
                 System.out.println("Failed to grab image!");
-                closeDevice(deviceNumber);
-                return;
-            }
-            
-            logger.debug("Waiting for image to return!");
-            
-            int result = grabDone(deviceNumber);
-            
-            while (result == 0) {
-                
-                try {
-                    Thread.sleep(100);
-                } catch (Exception e) {
-                    // ignore
-                }
-
-                logger.debug("Waiting for image to return!");
-
-                result = grabDone(deviceNumber);
-            }
-            
-            if (result == 1) {
-            	Image image = new Image(Format.BGRA32, getWidth(), getHeight(), buffer);
-   
-                consumer.gotImage(image);
-                
-            } else { 
-                System.out.println("Failed to grab image!");
-                closeDevice(deviceNumber);
+                closeDevice();
                 return;
             }
         }
-        closeDevice(deviceNumber);
+        closeDevice();
     }
-
-    /*
-    static MyApp junk;
-   
-    static { 
-        
-        boolean done = false;
-            
-        if (!done) { 
-            try { 
-                System.loadLibrary("nativemedia");
-                done = true;
-            } catch (Throwable e) { 
-                System.err.println("Failed to load native media library");
-                e.printStackTrace(System.err);
-            }
-        }
-
-        if (!done) { 
-            String lib = System.getProperty("user.dir") + "/nativemedia.dll";
-
-            try { 
-                System.loadLibrary(lib);
-            } catch (Throwable e) { 
-                System.err.println("Failed to load " + lib);
-                e.printStackTrace(System.err);
-            }
-        }
-
-        if (!done) { 
-            String lib = "e:/chat/nativemedia.dll";
-
-            try { 
-                System.loadLibrary(lib);
-            } catch (Throwable e) { 
-                System.err.println("Failed to load " + lib);
-                e.printStackTrace(System.err);
-            }
-        }
-
-        if (!done) { 
-            System.err.println("Failed to load windows webcam library!!!");
-        } else {
-            junk = new MyApp();
-        }
-    }
-    
-    private byte [] tmp;
-    
-    private int w;
-    private int h;
-    
-    protected DirectShowDevice(VideoConsumer consumer, int width, int height, int delay) {
-        super(consumer, width, height, delay);
-
-        System.out.println("Creating windows webcam " + width + "x" + height);
-        
-        junk.OpenVideo("camera");
-        
-        w = junk.GetFrameWidth();
-        h = junk.GetFrameHeight();
-        
-        tmp = new byte[w*h*4];
-
-        System.out.println("Camera output " + w + "x" + h);
-        
-        initialized(true);
-    }
-    
-    @Override
-    protected boolean nextImage(int[] pixels) {
-        
-        junk.NextFrame();
-        junk.GetFrameData(tmp);
-        
-      //  System.out.println("Got frame!");
-    
-        int index = 0;
-        
-        for (int i=0;i<w*h;i++) { 
-            
-            pixels[i] = 0xFF << 24 | 
-                        (((int) tmp[index]) & 0xFF) << 16 | 
-                        (((int) tmp[index+1]) & 0xFF) << 8 | 
-                        (((int) tmp[index+2]) & 0xFF);
-            index += 3;
-            
-            
-        }
-        
-        return true;
-    }
-    */    
 }
