@@ -7,21 +7,21 @@ import org.slf4j.LoggerFactory;
 
 import ibis.media.imaging.Format;
 import ibis.media.imaging.Image;
+import ibis.media.video.Resolution;
 import ibis.media.video.VideoConsumer;
 import ibis.media.video.VideoDeviceDescription;
 import ibis.media.video.devices.VideoSource;
 
 public class DirectShowDevice extends VideoSource {	
 	private static final Logger logger = LoggerFactory.getLogger(DirectShowDevice.class);
-
-	private native int getDeviceCapabilities(int deviceNumber);
-    private native int configureDevice(int deviceNumber, int width, int height);
+	
+    private native int configureDevice(int deviceNumber, int capabilityNumber);
     private native int startDevice(int deviceNumber);
-    private native int changeSize(int width, int height);    
-    private native boolean grabBuffer();
+    //private native int changeSize(int width, int height);    
+    private native int grabBuffer();
     private native int closeDevice();
     
-    private final int deviceNumber;     
+    private final int deviceNumber;
     private ByteBuffer buffer;
     
     public DirectShowDevice(VideoConsumer consumer, VideoDeviceDescription desc,
@@ -32,9 +32,11 @@ public class DirectShowDevice extends VideoSource {
         
         int result = 0;
         
-        this.deviceNumber = desc.deviceNumber;      
+        this.deviceNumber = desc.deviceNumber;
         
-        result = configureDevice(deviceNumber, width, height);        
+        int capabilityNumber = desc.getCapability(Format.RGB24).getNativeNumber(new Resolution(width, height));
+        
+        result = configureDevice(deviceNumber, capabilityNumber);        
         //changeSize(width, height);
         
         if (result != 0) { 
@@ -42,14 +44,12 @@ public class DirectShowDevice extends VideoSource {
             throw new Exception("Failed to configure device " + deviceNumber 
                     + "(result = " + result +")");
         }
-        
-        result = getDeviceCapabilities(deviceNumber);
-        
+                
         result = startDevice(deviceNumber);
         
         initialized(true);
     }
-    
+        
     private void addBuffer(ByteBuffer buffer) { 
         this.buffer = buffer;        
         //System.out.println("GOT BUFFER of size " + buffer.capacity());
@@ -57,7 +57,7 @@ public class DirectShowDevice extends VideoSource {
     
     //private void grabDone(ByteBuffer buffer) {
     private void grabDone() {
-    	Image image = new Image(Format.BGRA32, getWidth(), getHeight(), buffer);    	   
+    	Image image = new Image(Format.RGB24, getWidth(), getHeight(), buffer);    	
     	consumer.gotImage(image);
     } 
         
@@ -78,8 +78,8 @@ public class DirectShowDevice extends VideoSource {
         while (!getDone()) {
         	logger.debug("Grabbing image!");
             
-        	boolean result = grabBuffer();
-            if (!result) { 
+        	int result = grabBuffer();
+            if (result != 0) { 
                 System.out.println("Failed to grab image!");
                 closeDevice();
                 return;

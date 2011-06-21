@@ -27,15 +27,21 @@
 #pragma comment(lib, "advapi32")
 #pragma comment(lib, "shell32")
 
+#define DISCRETE   0
+#define CONTINUOUS 1
+#define STEPWISE   2
+
 //Device enumerator stuff
-int numberOfDevices;
+int numberOfDevices, numberOfCapabilities;
 char **deviceNames;
 IMoniker **deviceMonikers;
 struct SimpleCapParams currentDevice;
+struct SupportedSubtype *supportedTypes = NULL;
 
 //Selected Source filter
 CComPtr<IBaseFilter> sourceFilter;
 int selectedDevice = 0;
+int selectedCapability = 0;
 
 //Destination filter
 CComPtr<IBaseFilter> sinkFilter;
@@ -48,7 +54,7 @@ CComPtr<ICaptureGraphBuilder2> capGraph;
 CComPtr<IMediaControl> mediaControl;
 
 //Buffer for samples
-int *targetBuf;
+int allocced = 0;
 
 //state
 enum states { OFF, UNINITIALIZED, STOPPED, STARTED };
@@ -61,11 +67,39 @@ static JavaVM *jvm = NULL;
 JNIEnv *callingEnv;
 jobject callingObj;
 
+// GUID names
+HRESULT GetGUIDString(TCHAR *name, int size, GUID *pGUID)
+{
+    int i=0;
+    HRESULT hr = S_FALSE;
+
+	if (size < 1)
+	{
+		return E_INVALIDARG;
+	}
+
+	name[0] = TEXT('\0');
+
+    // Find format GUID's name in the named guids table
+    while (rgng[i].guid != 0)
+    {
+        if(*pGUID == *(rgng[i].guid))
+        {
+            hr = StringCchCat(name, size, rgng[i].name);
+            hr = S_OK;
+            break;
+        }
+        i++;
+    }
+
+	return hr;
+}
+
 
 HRESULT setup() 
 {
 	//Administration
-	if (state == UNINITIALIZED) return S_OK;
+	if (state == UNINITIALIZED || state == STOPPED) return S_OK;
 	else if (state != OFF) {
 		printf("setup called in the wrong state\n");
 		return -1;
@@ -297,65 +331,143 @@ JNIEXPORT jstring JNICALL Java_ibis_media_video_devices_directshow_DirectShowDis
 	return env->NewStringUTF(deviceNames[deviceNumber]);
 }
 
-JNIEXPORT jint JNICALL Java_ibis_media_video_devices_directshow_DirectShowDevice_getDeviceCapabilities(JNIEnv *env, jobject jo, jint deviceNumber) {
-	if (state != STOPPED) {
-		printf("getDeviceCapabilities called in the wrong state\n");
-		return false;
-	}
-
+int setupCapabilities() {
 	CComPtr<IAMStreamConfig> config = NULL;
-	HRESULT hr = capGraph->FindInterface(
-	    &PIN_CATEGORY_PREVIEW, 	// Preview pin.
-	    &MEDIATYPE_Video,    	// Only video types
-	    sourceFilter,			// Pointer to the capture filter.
-	    IID_IAMStreamConfig,
-	    (void**)&config);
+	HRESULT hr = capGraph->FindInterface(&PIN_CATEGORY_CAPTURE, // Preview pin.
+										&MEDIATYPE_Video,    	// Only video types
+										sourceFilter,			// Pointer to the capture filter.
+										IID_IAMStreamConfig,
+										(void**)&config);
 	if (FAILED(hr)) {
-		printf("FindInterface failed\n");
+		printf("FindInterface failed, %X\n", hr);
 		return -1;
 	}
 
 	int count = 0;
 	int size = 0;
+	int usableformats = 0;
 	hr = config->GetNumberOfCapabilities(&count, &size);
 	if (FAILED(hr)) {
-		printf("GetNumberOfCapabilities failed\n");
+		printf("GetNumberOfCapabilities failed, %X\n", hr);
 		return -1;
 	} else {
+		supportedTypes = new SupportedSubtype[count];
+
 		// Check the size to make sure we pass in the correct structure.
 		if (size == sizeof(VIDEO_STREAM_CONFIG_CAPS)) {
-		    // Use the video capabilities structure.
-		    for (int format = 0; format < count; format++)
-		    {
-		        VIDEO_STREAM_CONFIG_CAPS scc;
-		        AM_MEDIA_TYPE *mediatype;
-		        hr = config->GetStreamCaps(format, &mediatype, (BYTE*)&scc);
-		        if (SUCCEEDED(hr))
-		        {
-		        	if (mediatype->majortype == MEDIATYPE_Video) {
-		        		if (mediatype->subtype == MEDIASUBTYPE_RGB24) {
-		        			printf("RGB24 available \n");
-		        	    } else if (mediatype->subtype == MEDIASUBTYPE_RGB32) {
-		        	    	printf("RGB32 available \n");
-		        	    } else if (mediatype->subtype == MEDIASUBTYPE_ARGB32) {
-		        	    	printf("ARGB32 available \n");
-		        	    } else if (mediatype->subtype == MEDIASUBTYPE_AYUV) {
-		        	    	printf("AYUV available \n");
-		        	    }
-		        	}
-		            /* Examine the format, and possibly use it. */
+			// Use the video capabilities structure.
+			for (int format = 0; format < count; format++) {
+				VIDEO_STREAM_CONFIG_CAPS scc;
+				AM_MEDIA_TYPE *mediatype;
+				hr = config->GetStreamCaps(format, &mediatype, (BYTE*)&scc);
+				if (SUCCEEDED(hr)) {
+					if (mediatype->majortype == MEDIATYPE_Video) {
+						supportedTypes[usableformats].type = mediatype;
 
+						/*
+						TCHAR* name = new char[40];
+						hr = GetGUIDString(name, 40, &mediatype->subtype);
+						if (hr == S_OK) {
+							printf("subtype: %s\n", name);
+						} else {
+							printf("subtype fail\n");
+						}
+						free(name);
+						*/
 
-		            // Delete the media type when you are done.
-		            DeleteMediaType(mediatype);
-		        } else {
-		        	printf("GetStreamCaps failed\n");
-		        	return -1;
-		        }
-		    }
+						if (mediatype->subtype == MEDIASUBTYPE_RGB24) {
+							supportedTypes[usableformats].name = _T("RGB24");
+						} else if (mediatype->subtype == MEDIASUBTYPE_RGB32) {
+							supportedTypes[usableformats].name = _T("RGB32");
+						} else if (mediatype->subtype == MEDIASUBTYPE_ARGB32) {
+							supportedTypes[usableformats].name = _T("ARGB32");
+						} else if (mediatype->subtype == MEDIASUBTYPE_AYUV) {
+							supportedTypes[usableformats].name = _T("AYUV");
+						} else if (mediatype->subtype == MEDIASUBTYPE_YUY2) {
+							supportedTypes[usableformats].name = _T("YUY2");
+						} else if (mediatype->subtype == MEDIASUBTYPE_MJPG) {
+							supportedTypes[usableformats].name = _T("MJPG");
+						} else {
+							supportedTypes[usableformats].name = _T("Unsupported");
+						}
+
+						if (	(mediatype->formattype == FORMAT_VideoInfo) &&
+								(mediatype->cbFormat >= sizeof (VIDEOINFOHEADER)) &&
+								(mediatype->pbFormat != NULL)) {
+
+							VIDEOINFOHEADER *pvi = (VIDEOINFOHEADER*)mediatype->pbFormat;
+							supportedTypes[usableformats].width = pvi->bmiHeader.biWidth;
+							supportedTypes[usableformats].height = pvi->bmiHeader.biHeight;
+						}
+					}
+
+					//DeleteMediaType(mediatype);
+				} else {
+					printf("GetStreamCaps failed, %X\n", hr);
+					return -1;
+				}
+
+				usableformats++;
+			}
+			numberOfCapabilities = usableformats;
 		}
 	}
+	return usableformats;
+}
 
+JNIEXPORT jint JNICALL Java_ibis_media_video_devices_directshow_DirectShowDiscovery_initDeviceCapabilities(JNIEnv *env, jobject jo, jint deviceNumber) {
+	if (state == UNINITIALIZED) {
+		selectedDevice = deviceNumber;
+		HRESULT hr = setupGraph();
+		if (FAILED(hr)) return hr;
+	}
+	if (state != STOPPED) {
+		printf("initDeviceCapabilities called in the wrong state\n");
+		return false;
+	}
+
+	return setupCapabilities();
+}
+
+HRESULT callbackCapability(JNIEnv *env, jobject jo, jint capabilityNumber, jint type, jstring palette, jint width, jint height) {
+	jmethodID mid;
+	jclass clazz;
+
+	// Prepare the info needed to do a Java callback
+	clazz = env->GetObjectClass(jo);
+
+	if (clazz == NULL) {
+		return -12;
+	}
+
+	mid = env->GetMethodID(clazz, "capability", "(IILjava/lang/String;II)V");
+
+	if (mid == NULL) {
+		return -13;
+	}
+
+	// Inform Java of the device capabilities
+	env->CallVoidMethod(jo, mid, capabilityNumber, type, palette, width, height);
+
+	return 0;
+}
+
+JNIEXPORT jint JNICALL Java_ibis_media_video_devices_directshow_DirectShowDiscovery_getDeviceCapabilities(JNIEnv *env, jobject jo, jint capabilityNumber) {
+	if (state != STOPPED) {
+		printf("getDeviceCapabilities called in the wrong state\n");
+		return -1;
+	}
+
+	if (supportedTypes == NULL) setupCapabilities();
+
+	if (capabilityNumber < 0 || capabilityNumber > numberOfCapabilities) {
+		printf("getDeviceCapabilities called with unusable parameter\n");
+		return -1;
+	}
+
+	callbackCapability(	env, jo, capabilityNumber, CONTINUOUS, env->NewStringUTF(supportedTypes[capabilityNumber].name), supportedTypes[capabilityNumber].width, supportedTypes[capabilityNumber].height);
+
+	return S_OK;
 }
 
 
@@ -383,45 +495,55 @@ HRESULT callbackAddBuffer(JNIEnv *env, jobject jo, jobject buffer) {
         return S_OK;
 }
 
-HRESULT changeSz(int width, int height) {
+HRESULT setupDevice() {
 	HRESULT hr;
 
 	//Get the configuration interface
 	CComPtr<IAMStreamConfig> config;
 	hr = capGraph->FindInterface(&PIN_CATEGORY_CAPTURE,
-										 &MEDIATYPE_Video, sourceFilter,
-										 IID_IAMStreamConfig, (void **)&config);
+								 &MEDIATYPE_Video, sourceFilter,
+								 IID_IAMStreamConfig, (void **)&config);
 	if (FAILED(hr)) {
-		printf("FindInterface failed, %X", hr);
+		printf("FindInterface failed, %X\n", hr);
 		return hr;
 	}
 
 	//Get the current media format
-	AM_MEDIA_TYPE *type;
-	config->GetFormat(&type);
+	AM_MEDIA_TYPE *mediatype;
+	config->GetFormat(&mediatype);
 	if (FAILED(hr)) {
-		printf("GetFormat failed, %X", hr);
+		printf("GetFormat failed, %X\n", hr);
 		return hr;
 	}
 
+	/*
 	//Leave everything but the size alone
-	if(type->formattype == FORMAT_VideoInfo) {
-		VIDEOINFOHEADER *pvi = (VIDEOINFOHEADER *)type->pbFormat;
+	if(mediatype->formattype == FORMAT_VideoInfo) {
+		VIDEOINFOHEADER *pvi = (VIDEOINFOHEADER *)mediatype->pbFormat;
 		pvi->bmiHeader.biWidth = width;
 		pvi->bmiHeader.biHeight = height;
 		pvi->bmiHeader.biSizeImage = DIBSIZE(pvi->bmiHeader);
 
-		hr = config->SetFormat(type);
+		hr = config->SetFormat(mediatype);
 		if (FAILED(hr)) {
-			printf("SetFormat failed, %X", hr);
+			printf("SetFormat failed, %X\n", hr);
 			return hr;
 		}
+	}
+	*/
+
+	printf("Selected capability: %s %d x %d\n", supportedTypes[selectedCapability].name, supportedTypes[selectedCapability].width, supportedTypes[selectedCapability].height);
+
+	hr = config->SetFormat(supportedTypes[selectedCapability].type);
+	if (FAILED(hr)) {
+		printf("SetFormat failed, %X\n", hr);
+		return hr;
 	}
 
 	return S_OK;
 }
 
-JNIEXPORT jint JNICALL Java_ibis_media_video_devices_directshow_DirectShowDevice_configureDevice(JNIEnv *env, jobject jo, jint deviceNumber, jint width, jint height) {	
+JNIEXPORT jint JNICALL Java_ibis_media_video_devices_directshow_DirectShowDevice_configureDevice(JNIEnv *env, jobject jo, jint deviceNumber, jint capabilityNumber) {
 	HRESULT hr;
 
 	if (deviceNumber < 0 || deviceNumber > numberOfDevices) {
@@ -429,12 +551,15 @@ JNIEXPORT jint JNICALL Java_ibis_media_video_devices_directshow_DirectShowDevice
 		return -1;
 	}
 
-	if (state == STOPPED) return S_OK;
+	if (capabilityNumber < 0 || capabilityNumber > numberOfCapabilities) {
+		printf("illegal capability selected\n");
+		return -1;
+	}
+
 	if (state == OFF) {
 		hr = setup();
 		if (FAILED(hr)) return hr;
-	}
-	if (state != UNINITIALIZED) {
+	} else if (state != STOPPED) {
 		printf("configureDevice called in the wrong state\n");
 		return false;
 	}
@@ -443,6 +568,11 @@ JNIEXPORT jint JNICALL Java_ibis_media_video_devices_directshow_DirectShowDevice
 	hr = setupGraph();
 	if (FAILED(hr)) return hr;
 
+	selectedCapability = capabilityNumber;
+	hr = setupDevice();
+	if (FAILED(hr)) return hr;
+
+	/*
 	jobject buffer;
 
 	currentDevice.mWidth = width;
@@ -451,15 +581,16 @@ JNIEXPORT jint JNICALL Java_ibis_media_video_devices_directshow_DirectShowDevice
 
 	changeSz(width, height);
 	if (FAILED(hr)) {
-		printf("changeSz failed, %X", hr);
+		printf("changeSz failed, %X\n", hr);
 		return hr;
 	}
 
 	buffer = env->NewDirectByteBuffer(currentDevice.mTargetBuf, (jlong) (width * height * sizeof(int)));
+	*/
 
 	state = STOPPED;
 
-	return callbackAddBuffer(env, jo, buffer);
+	return S_OK; //callbackAddBuffer(env, jo, buffer);
 }
 
 JNIEXPORT jint JNICALL Java_ibis_media_video_devices_directshow_DirectShowDevice_startDevice(JNIEnv *env, jobject jo, jint deviceNumber) {
@@ -483,19 +614,23 @@ JNIEXPORT jint JNICALL Java_ibis_media_video_devices_directshow_DirectShowDevice
 	}
 
 	state = STARTED;
+
+	return S_OK;
 }
 
-JNIEXPORT jint JNICALL Java_ibis_media_video_devices_directshow_DirectShowDevice_changeSize(JNIEnv *env, jobject jo, jint width, jint height) {
-	return changeSz(width, height);
-}
+//JNIEXPORT jint JNICALL Java_ibis_media_video_devices_directshow_DirectShowDevice_changeSize(JNIEnv *env, jobject jo, jint width, jint height) {
+//	return S_OK; //changeSz(width, height);
+//}
 
-JNIEXPORT jboolean JNICALL Java_ibis_media_video_devices_directshow_DirectShowDevice_grabBuffer(JNIEnv *env, jobject jo) {
-	if (state != STARTED) return false;
+JNIEXPORT jint JNICALL Java_ibis_media_video_devices_directshow_DirectShowDevice_grabBuffer(JNIEnv *env, jobject jo) {
+	if (state != STARTED) return -1;
 
 	if (jvm == NULL) env->GetJavaVM(&jvm);
 
 	callingObj = jo;
 	bufferState = GRAB_REQUESTED;
+
+	return S_OK;
 }
 
 JNIEXPORT jint JNICALL Java_ibis_media_video_devices_directshow_DirectShowDevice_closeDevice(JNIEnv *env, jobject jo) {
@@ -564,10 +699,11 @@ HRESULT CCapRenderer::SetMediaType(const CMediaType *pmt)
     m_lVidHeight = abs(pviBmp->bmiHeader.biHeight);
 
 	//Allocate the target buffer
-	currentDevice.mTargetBuf = new int[m_lVidWidth*m_lVidHeight];
+    currentDevice.mTargetBuf = new byte[m_lVidWidth*m_lVidHeight*3];
+    allocced = 1;
 
 	// We are forcing RGB24
-    m_lVidPitch = (m_lVidWidth * 3 + 3) & ~(3);
+    //m_lVidPitch = (m_lVidWidth * 3 + 3) & ~(3);
     
 	return S_OK;
 }
@@ -620,31 +756,23 @@ HRESULT CCapRenderer::DoRenderSample( IMediaSample * pSample )
 		//Get a pointer to the sample's bytebuffer
 		BYTE * pBmpBuffer;
 		pSample->GetPointer( &pBmpBuffer );
-		//int size = pSample->GetSize();
+
+		//Flip the bytebuffer (java expects it other-end-up)
+		int size = pSample->GetSize();
+
+		if (!allocced || sizeof(currentDevice.mTargetBuf) != size) {
+			currentDevice.mTargetBuf = new BYTE[size];
+			allocced = 1;
+		}
+
+		for (int i=0; i<size; i++) {
+			currentDevice.mTargetBuf[i] = pBmpBuffer[size-i-1] & 0xff;
+		}
 
 		//Attach the current buffer to the java object
-		//jobject buffer;
-		//buffer = jenv->NewDirectByteBuffer(currentDevice.mTargetBuf, (jlong) size);
-		//callbackAddBuffer(jenv, callingObj, buffer);
-
-
-		//Use the width and height given
-		wx = currentDevice.mWidth;
-		wy = currentDevice.mHeight;
-
-		for (int i=0,c=0;i<wy;i++)
-		{
-			for (int j=0;j<wx;j++,c++)
-			{
-				int cb=pBmpBuffer[(((wy-i-1)*m_lVidHeight/wy)*m_lVidPitch+((j*m_lVidWidth/wx)*3))+0]&0xff;
-				int cg=pBmpBuffer[(((wy-i-1)*m_lVidHeight/wy)*m_lVidPitch+((j*m_lVidWidth/wx)*3))+1]&0xff;
-				int cr=pBmpBuffer[(((wy-i-1)*m_lVidHeight/wy)*m_lVidPitch+((j*m_lVidWidth/wx)*3))+2]&0xff;
-
-				currentDevice.mTargetBuf[c] =	((cr)<<16)+
-												((cg)<<8) +
-												((cb)) | 0xff000000;
-			}
-		}
+		jobject buffer;
+		buffer = jenv->NewDirectByteBuffer(currentDevice.mTargetBuf, (jlong) size);
+		callbackAddBuffer(jenv, callingObj, buffer);
 
 
 		HRESULT hr = callbackGrabDone(jenv);
@@ -659,3 +787,5 @@ HRESULT CCapRenderer::DoRenderSample( IMediaSample * pSample )
 
     return S_OK;
 }
+
+

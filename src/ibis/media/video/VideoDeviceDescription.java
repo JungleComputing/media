@@ -45,5 +45,9 @@ public class VideoDeviceDescription {
     
     public Format [] getFormats() { 
         return formats;
-    }    
+    }  
+    
+    public Capability getCapability(Format f) {
+    	return capabilities.get(f);
+    }
 }
