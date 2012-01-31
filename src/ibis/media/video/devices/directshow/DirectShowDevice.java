@@ -95,6 +95,7 @@ public class DirectShowDevice extends VideoSource {
             
             if (result == 1) {
             	Image image = new Image(Format.BGRA32, getWidth(), getHeight(), buffer);
+            	image.setNumber(deviceNumber);
    
                 consumer.gotImage(image);
                 

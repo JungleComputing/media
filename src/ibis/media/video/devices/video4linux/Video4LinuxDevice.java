@@ -231,6 +231,7 @@ public class Video4LinuxDevice extends VideoSource {
         tmp.limit(size);
                 
         Image img = images[index];
+        img.setNumber(deviceNumber);
         
        // System.out.println("Image has size " + img.getWidth() + " x " + img.getHeight());
         

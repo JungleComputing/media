@@ -145,6 +145,8 @@ public final class Image implements Serializable {
             throw new Exception("Incompatible size");
         }
 
+	dst.number = src.number;
+
         ByteBuffer s = src.getData();
         s.position(0);
         s.limit(s.capacity());
